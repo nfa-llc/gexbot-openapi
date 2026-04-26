@@ -98,6 +98,10 @@ paths:
       responses:
         "200":
           description: Max change data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/maxchange_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -119,6 +123,10 @@ paths:
       responses:
         "200":
           description: Majors data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/majors_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -412,24 +420,79 @@ components:
         - META
         - MSFT
         - MSTR
-        - MU
-        - NFLX
-        - NVDA
-        - PLTR
-        - QQQ
-        - SLV
-        - SMCI
-        - SNOW
-        - SOFI
-        - SPY
-        - TLT
-        - TQQQ
-        - TSLA
-        - TSM
-        - UNH
-        - USO
-        - UVXY
-        - VALE
+
+    majors_response:
+      type: object
+      properties:
+        zero_gamma:
+          $ref: '#/components/schemas/zero_gamma'
+        mpos_vol:
+          $ref: '#/components/schemas/_float'
+        mpos_oi:
+          $ref: '#/components/schemas/_float'
+        mneg_vol:
+          $ref: '#/components/schemas/_float'
+        mneg_oi:
+          $ref: '#/components/schemas/_float'
+        net_gex_vol:
+          $ref: '#/components/schemas/_float'
+        net_gex_oi:
+          $ref: '#/components/schemas/_float'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker'
+        spot:
+          $ref: '#/components/schemas/spot'
+    maxchange_response:
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker'
+        current:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
+        one:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
+        five:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
+        ten:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
+        fifteen:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
+        thirty:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 2
+          maxItems: 2
     filter:
       type: string
       enum:
@@ -823,8 +886,7 @@ components:
                 type: string
     "409":
       description: Conflict
-    "500":
-      description: Internal Server Error
+
   headers:
     Accept:
       description: Content type accepted by the client
