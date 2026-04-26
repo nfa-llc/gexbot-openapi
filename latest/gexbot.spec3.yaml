@@ -10,12 +10,12 @@ servers:
   - url: https://api.gex.bot/v2
     description: Primary v2 API server
 paths:
-  /{ticker}/classic/{classic_category}:
+  /{ticker}/classic/{category}:
     get:
       summary: Get chart data for a ticker, package, and category
       description: Returns chart data for the specified ticker, package, and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/package_in_path"
@@ -35,7 +35,7 @@ paths:
           $ref: "#/components/responses/403"
       tags:
         - Public
-  /{ticker}/state/{state_category}:
+  /{ticker}/state/{category}:
     get:
       summary: Get state data for a ticker and category
       description: Returns state data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
@@ -60,14 +60,15 @@ paths:
           $ref: "#/components/responses/403"
       tags:
         - Public
-  /{ticker}/orderflow/orderflow:
+  /{ticker}/orderflow/{category}:
     get:
       summary: Get orderflow data for a ticker
       description: Returns orderflow data for the specified ticker. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/schemas/category_orderflow"
       responses:
         "200":
           description: Orderflow data response
@@ -89,7 +90,7 @@ paths:
       summary: Get max change data for a ticker, package, and category
       description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/package_in_path"
@@ -110,7 +111,7 @@ paths:
       summary: Get majors data for a ticker, package, and category
       description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/package_in_path"
@@ -132,7 +133,7 @@ paths:
       description: Returns the list of available ticker symbols supported by the API, including stocks, indexes, and futures.
       tags:
         - Public
-      security: []
+      security: [ ]
       parameters:
         - in: header
           name: User-Agent
@@ -145,7 +146,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [application/json]
+            enum: [ application/json ]
           description: Set to "application/json".
       responses:
         '200':
@@ -183,7 +184,7 @@ paths:
       tags:
         - Public
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - name: ticker
           in: path
@@ -196,14 +197,14 @@ paths:
           required: true
           schema:
             type: string
-            enum: [classic, state, orderflow]
+            enum: [ classic, state, orderflow ]
           description: The data package to query.
         - name: category
           in: path
           required: true
           schema:
             type: string
-            enum: [gex_full, gex_zero, gex_one, delta_zero, gamma_zero, vanna_zero, charm_zero, delta_one, gamma_one, vanna_one, charm_one, orderflow]
+            enum: [ gex_full, gex_zero, gex_one, delta_zero, gamma_zero, vanna_zero, charm_zero, delta_one, gamma_one, vanna_one, charm_one, orderflow ]
           description: The specific data category within the package.
         - name: date
           in: path
@@ -223,14 +224,14 @@ paths:
           required: true
           schema:
             type: string
-            enum: [application/json]
+            enum: [ application/json ]
           description: Set to "application/json".
         - in: header
           name: Accept-Encoding
           required: false
           schema:
             type: string
-            enum: [gzip]
+            enum: [ gzip ]
           description: Optional. Set to "gzip" to receive compressed data.
         - in: header
           name: User-Agent
@@ -243,7 +244,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [application/json]
+            enum: [ application/json ]
           description: Set to "application/json".
       responses:
         '200':
@@ -270,14 +271,14 @@ paths:
       tags:
         - Public
       security:
-        - bearer_auth: []
+        - bearer_auth: [ ]
       parameters:
         - in: header
           name: Content-Type
           required: true
           schema:
             type: string
-            enum: [application/json]
+            enum: [ application/json ]
           description: Set to "application/json".
         - in: header
           name: User-Agent
@@ -290,7 +291,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [application/json]
+            enum: [ application/json ]
           description: Set to "application/json".
       responses:
         '200':
