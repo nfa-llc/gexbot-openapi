@@ -602,8 +602,6 @@ components:
           $ref: '#/components/schemas/_float'
       type: object
 
-
-
     category_classic:
       type: string
       enum:
