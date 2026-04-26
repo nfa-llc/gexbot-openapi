@@ -1,0 +1,1527 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "NFA gexbot API",
+    "description": "NFA gexbot API",
+    "version": "2.2.0",
+    "termsOfService": "https://www.gexbot.com/terms-and-conditions"
+  },
+  "servers": [
+    {
+      "url": "https://api.gex.bot/v2",
+      "description": "Primary v2 API server"
+    }
+  ],
+  "paths": {
+    "/{ticker}/classic/{category}": {
+      "get": {
+        "summary": "Get chart data for a ticker and category",
+        "description": "Returns chart data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/classic_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chart data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/basic_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/state/{category}": {
+      "get": {
+        "summary": "Get state data for a ticker and category",
+        "description": "Returns state data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/state_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chart data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/basic_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/orderflow/{category}": {
+      "get": {
+        "summary": "Get orderflow data for a ticker",
+        "description": "Returns orderflow data for the specified ticker. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/schemas/category_orderflow"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orderflow data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/orderflow_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/classic/{category}/maxchange": {
+      "get": {
+        "summary": "Get max change data for a ticker and category",
+        "description": "Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker and category.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/classic_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Max change data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/maxchange_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/state/{category}/maxchange": {
+      "get": {
+        "summary": "Get max change data for a ticker, package, and category",
+        "description": "Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker, package, and category.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/state_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Max change data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/maxchange_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/classic/{category}/majors": {
+      "get": {
+        "summary": "Get majors data for a ticker, package, and category",
+        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/classic_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Majors data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/majors_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/state/{category}/majors": {
+      "get": {
+        "summary": "Get majors data for a ticker, package, and category",
+        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/state_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Majors data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/majors_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        },
+        "tags": [
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/tickers": {
+      "get": {
+        "summary": "List all available ticker symbols",
+        "description": "Returns the list of available ticker symbols supported by the API, including stocks, indexes, and futures.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stocks": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array of stock ticker symbols."
+                    },
+                    "indexes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array of index ticker symbols."
+                    },
+                    "futures": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Array of futures ticker symbols."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        }
+      }
+    },
+    "/hist/{ticker}/{package}/{category}/{date}": {
+      "get": {
+        "summary": "Download historical data for a specific ticker, package, category, and date",
+        "description": "Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day look-back window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.",
+        "tags": [
+          "Quant"
+        ],
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/package_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/category_in_path"
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "description": "The date to query in YYYY-MM-DD format."
+          },
+          {
+            "name": "noredirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional. If included, returns a JSON object with the URL instead of a 302 redirect."
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "application/json"
+              ]
+            },
+            "description": "Set to \"application/json\"."
+          },
+          {
+            "name": "Accept-Encoding",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "gzip"
+              ]
+            },
+            "description": "Optional. Set to \"gzip\" to receive compressed data."
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "The temporary, pre-signed URL to download the requested historical data file."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        }
+      }
+    },
+    "/negotiate": {
+      "get": {
+        "summary": "Negotiate WebSocket connection for real-time feeds",
+        "description": "Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard (zstd) compressed Protocol Buffers (Protobuf). Each Quant subscriber is allowed 1 active connection per hub.",
+        "tags": [
+          "Quant"
+        ],
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Content-Type",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "application/json"
+              ]
+            },
+            "description": "Set to \"application/json\"."
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "websocket_urls": {
+                      "type": "object",
+                      "properties": {
+                        "classic": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Connection URL for the 'Classic GEX' hub."
+                        },
+                        "state_gex": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Connection URL for the 'State GEX Profile' hub."
+                        },
+                        "state_greeks_zero": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Connection URL for the 'State Greeks (0DTE)' hub."
+                        },
+                        "state_greeks_one": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Connection URL for the 'State Greeks (1DTE+)' hub."
+                        },
+                        "orderflow": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Connection URL for the 'Orderflow' hub."
+                        }
+                      }
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Prefix string for each group (within a hub)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "_float": {
+        "type": "number",
+        "format": "float"
+      },
+      "_double": {
+        "type": "number",
+        "format": "double"
+      },
+      "_int": {
+        "type": "integer"
+      },
+      "_int32": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "_int64": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "_string": {
+        "type": "string"
+      },
+      "level": {
+        "type": "string",
+        "enum": [
+          "ORDERFLOW",
+          "CLASSIC",
+          "STATE"
+        ]
+      },
+      "agg": {
+        "enum": [
+          "day"
+        ]
+      },
+      "ticker": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ticker_stock"
+          },
+          {
+            "$ref": "#/components/schemas/ticker_index"
+          },
+          {
+            "$ref": "#/components/schemas/ticker_variant"
+          }
+        ]
+      },
+      "ticker_variant": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 6,
+        "enum": [
+          "ES_SPX",
+          "NDXP",
+          "NQ_NDX",
+          "RUTW",
+          "SPXW",
+          "VIXW"
+        ]
+      },
+      "ticker_index": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 3,
+        "enum": [
+          "NDX",
+          "RUT",
+          "SPX",
+          "VIX"
+        ]
+      },
+      "ticker_stock": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 5,
+        "enum": [
+          "AAPL",
+          "AMD",
+          "AMZN",
+          "APP",
+          "AVGO",
+          "BABA",
+          "BOIL",
+          "COIN",
+          "CRWD",
+          "CRWV",
+          "DDOG",
+          "DIA",
+          "GLD",
+          "GME",
+          "GOOG",
+          "GOOGL",
+          "HOOD",
+          "HYG",
+          "IBIT",
+          "INTC",
+          "IONQ",
+          "IWM",
+          "META",
+          "MSFT",
+          "MSTR",
+          "MU",
+          "NFLX",
+          "NVDA",
+          "NVO",
+          "ORCL",
+          "PL",
+          "PLTR",
+          "QQQ",
+          "RDDT",
+          "ROKU",
+          "SHOP",
+          "SLV",
+          "SMCI",
+          "SNDK",
+          "SNOW",
+          "SOFI",
+          "SPY",
+          "TLT",
+          "TQQQ",
+          "TSLA",
+          "TSM",
+          "UBER",
+          "UNG",
+          "UNH",
+          "USO",
+          "UVXY",
+          "VALE",
+          "ZS"
+        ]
+      },
+      "majors_response": {
+        "type": "object",
+        "properties": {
+          "zero_gamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "mpos_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "mpos_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "mneg_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "mneg_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "net_gex_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "net_gex_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "ticker": {
+            "$ref": "#/components/schemas/ticker"
+          },
+          "spot": {
+            "$ref": "#/components/schemas/_double"
+          }
+        }
+      },
+      "maxchange_response": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "ticker": {
+            "$ref": "#/components/schemas/ticker"
+          },
+          "current": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "one": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "five": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "ten": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "fifteen": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "thirty": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "filter": {
+        "type": "string",
+        "enum": [
+          "majors",
+          "maxchange"
+        ],
+        "description": "Filter: * `majors` - filter to majors only * `maxchange` - filter to max change only\n"
+      },
+      "category_state": {
+        "type": "string",
+        "enum": [
+          "charm",
+          "charm_one",
+          "charm_zero",
+          "delta",
+          "delta_one",
+          "delta_zero",
+          "gamma",
+          "gamma_one",
+          "gamma_zero",
+          "onecharm",
+          "onedelta",
+          "onegamma",
+          "onevanna",
+          "vanna",
+          "vanna_one",
+          "vanna_zero"
+        ],
+        "description": "Type: * `delta` or `delta_zero` - The delta * `gamma` or `gamma_zero` - The gamma (long/short) * `vanna` or `vanna_zero` - The vanna * `charm` or `charm_zero`-  The charm * `onedelta` or `delta_one` - 1dte delta * `onegamma` or `gamma_one` - 1dte gamma (long/short) * `onevanna` or `vanna_one` - 1dte vanna * `onecharm` or `charm_one`- 1dte charm\n"
+      },
+      "basic_response": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "ticker": {
+            "$ref": "#/components/schemas/ticker"
+          },
+          "min_dte": {
+            "$ref": "#/components/schemas/_int"
+          },
+          "sec_min_dte": {
+            "$ref": "#/components/schemas/_int"
+          },
+          "spot": {
+            "$ref": "#/components/schemas/_double"
+          },
+          "zero_gamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_pos_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_pos_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_neg_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_neg_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "strikes": {
+            "$ref": "#/components/schemas/strikes"
+          },
+          "sum_gex_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "sum_gex_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "delta_risk_reversal": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "max_priors": {
+            "$ref": "#/components/schemas/max_priors"
+          }
+        }
+      },
+      "orderflow_response": {
+        "properties": {
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "ticker": {
+            "$ref": "#/components/schemas/ticker"
+          },
+          "spot": {
+            "$ref": "#/components/schemas/_double"
+          },
+          "z_mlgamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "z_msgamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "o_mlgamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "o_msgamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zero_mcall": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zero_mput": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_mcall": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_mput": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zcvr": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "ocvr": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zgr": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "ogr": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zvanna": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "ovanna": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "zcharm": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "ocharm": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "agg_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_agg_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "agg_call_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_agg_call_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "agg_put_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_agg_put_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "net_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_net_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "net_call_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_net_call_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "net_put_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_net_put_dex": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "dexoflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "gexoflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "cvroflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_dexoflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_gexoflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "one_cvroflow": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "min_dte": {
+            "$ref": "#/components/schemas/_int"
+          },
+          "sec_min_dte": {
+            "$ref": "#/components/schemas/_int"
+          },
+          "zero_gamma": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_pos_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_pos_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_neg_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "major_neg_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "strikes": {
+            "$ref": "#/components/schemas/strikes"
+          },
+          "sum_gex_vol": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "sum_gex_oi": {
+            "$ref": "#/components/schemas/_float"
+          },
+          "delta_risk_reversal": {
+            "$ref": "#/components/schemas/_float"
+          }
+        },
+        "type": "object"
+      },
+      "category_classic": {
+        "type": "string",
+        "enum": [
+          "full",
+          "gex_full",
+          "zero",
+          "gex_zero",
+          "one",
+          "gex_one"
+        ],
+        "description": "Classic GEX data category:\n* `full` or `gex_full` - Full aggregation of GEX (call/put), up to 90 days out\n* `zero` or `gex_zero` - Only next expiry+0 of GEX (call/put), 0dte\n* `one` or `gex_one` - Only next expiry+1 of GEX (call/put)\n"
+      },
+      "category_orderflow": {
+        "type": "string",
+        "enum": [
+          "orderflow"
+        ],
+        "description": "Orderflow data category:\n* `orderflow` - All orderflow metrics\n"
+      },
+      "timestamp": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "error_response": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "min_dte": {
+        "$ref": "#/components/schemas/_int"
+      },
+      "sec_min_dte": {
+        "$ref": "#/components/schemas/_int"
+      },
+      "spot": {
+        "$ref": "#/components/schemas/_double"
+      },
+      "zero_gamma": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_pos_vol": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_long_gamma": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_short_gamma": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_pos_oi": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_neg_vol": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "major_neg_oi": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "mini_contracts": {
+        "type": "array",
+        "items": {
+          "type": "array"
+        }
+      },
+      "strikes": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "sum_gex_vol": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "sum_gex_oi": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "delta_risk_reversal": {
+        "$ref": "#/components/schemas/_float"
+      },
+      "max_priors": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "z_mlgamma": {
+        "type": "integer"
+      },
+      "z_msgamma": {
+        "type": "integer"
+      },
+      "o_mlgamma": {
+        "type": "integer"
+      },
+      "o_msgamma": {
+        "type": "integer"
+      },
+      "zero_mcall": {
+        "type": "integer"
+      },
+      "zero_mput": {
+        "type": "integer"
+      },
+      "one_mcall": {
+        "type": "integer"
+      },
+      "one_mput": {
+        "type": "integer"
+      },
+      "zcvr": {
+        "type": "integer"
+      },
+      "ocvr": {
+        "type": "integer"
+      },
+      "zgr": {
+        "type": "integer"
+      },
+      "ogr": {
+        "type": "integer"
+      },
+      "zvanna": {
+        "type": "integer"
+      },
+      "ovanna": {
+        "type": "integer"
+      },
+      "zcharm": {
+        "type": "integer"
+      },
+      "ocharm": {
+        "type": "integer"
+      },
+      "agg_dex": {
+        "type": "integer"
+      },
+      "one_agg_dex": {
+        "type": "integer"
+      },
+      "agg_call_dex": {
+        "type": "integer"
+      },
+      "one_agg_call_dex": {
+        "type": "integer"
+      },
+      "agg_put_dex": {
+        "type": "integer"
+      },
+      "one_agg_put_dex": {
+        "type": "integer"
+      },
+      "net_dex": {
+        "type": "integer"
+      },
+      "one_net_dex": {
+        "type": "integer"
+      },
+      "net_call_dex": {
+        "type": "integer"
+      },
+      "one_net_call_dex": {
+        "type": "integer"
+      },
+      "net_put_dex": {
+        "type": "integer"
+      },
+      "one_net_put_dex": {
+        "type": "integer"
+      },
+      "dexoflow": {
+        "type": "integer"
+      },
+      "gexoflow": {
+        "type": "integer"
+      },
+      "cvroflow": {
+        "type": "integer"
+      },
+      "one_dexoflow": {
+        "type": "integer"
+      },
+      "one_gexoflow": {
+        "type": "integer"
+      },
+      "one_cvroflow": {
+        "type": "integer"
+      }
+    },
+    "parameters": {
+      "ticker_in_path": {
+        "name": "ticker",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ticker"
+        }
+      },
+      "category_in_path": {
+        "name": "category",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/category_classic"
+            },
+            {
+              "$ref": "#/components/schemas/category_state"
+            },
+            {
+              "$ref": "#/components/schemas/category_orderflow"
+            }
+          ]
+        }
+      },
+      "classic_category_in_path": {
+        "name": "category",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/category_classic"
+        }
+      },
+      "state_category_in_path": {
+        "name": "category",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/category_classic"
+            },
+            {
+              "$ref": "#/components/schemas/category_state"
+            }
+          ]
+        }
+      },
+      "package_in_path": {
+        "name": "package",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "classic",
+            "state",
+            "orderflow"
+          ],
+          "description": "Data package type:\n* `classic` - Classic subscription data\n* `state` - State subscription data\n* `orderflow` - Orderflow subscription data\n"
+        }
+      },
+      "sub_type_in_path": {
+        "name": "subtype",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "gex_full",
+            "full",
+            "gex_zero",
+            "zero",
+            "gex_one",
+            "one"
+          ]
+        }
+      },
+      "user_agent_header": {
+        "name": "User-Agent",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identify your client application."
+      },
+      "accept_header": {
+        "name": "Accept",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "application/json"
+          ]
+        },
+        "description": "Set to \"application/json\"."
+      }
+    },
+    "securitySchemes": {
+      "bearer_auth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK"
+      },
+      "201": {
+        "description": "Created"
+      },
+      "202": {
+        "description": "Accepted"
+      },
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized. User is not authenticated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Forbidden. User does not have access to the resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Conflict"
+      },
+      "200_Message": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "400_Message": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "headers": {
+      "Accept": {
+        "description": "Content type accepted by the client",
+        "required": true,
+        "schema": {
+          "enum": [
+            "application/json",
+            "application/octet-stream"
+          ],
+          "default": "application/json",
+          "example": "application/json"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer_auth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Public",
+      "description": "Endpoints that do not require authentication, such as listing available tickers and downloading historical data."
+    },
+    {
+      "name": "Classic",
+      "description": "Available with Classic Subscription"
+    },
+    {
+      "name": "State",
+      "description": "Available with State Subscription"
+    },
+    {
+      "name": "Orderflow",
+      "description": "Available with Orderflow Subscription"
+    },
+    {
+      "name": "Quant",
+      "description": "Available with Quant Subscription"
+    }
+  ]
+}
