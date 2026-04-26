@@ -1,0 +1,894 @@
+openapi: 3.0.1
+info:
+  title: NFA gexbot API
+  description: NFA gexbot API
+  version: 1.2.0
+  termsOfService: "https://www.gexbot.com/terms-and-conditions"
+servers:
+  - url: https://api.gexbot.com
+    description: Primary v1 API server
+  - url: https://api.gex.bot/v2
+    description: Primary v2 API server
+paths:
+  /{ticker}/classic/{classic_category}:
+    get:
+      summary: Get chart data for a ticker, package, and category
+      description: Returns chart data for the specified ticker, package, and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tickerInPath"
+        - $ref: "#/components/parameters/packageInPath"
+        - $ref: "#/components/parameters/categoryInPath"
+        - $ref: "#/components/parameters/apiKey"
+      responses:
+        "200":
+          description: Chart data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicResponse"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /{ticker}/state/{state_category}:
+    get:
+      summary: Get state data for a ticker and category
+      description: Returns state data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
+      security:
+        - apiKeyAuth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/tickerInPath"
+        - $ref: "#/components/parameters/packageInPath"
+        - $ref: "#/components/parameters/categoryInPath"
+        - $ref: "#/components/parameters/apiKey"
+      responses:
+        "200":
+          description: Chart data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicResponse"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /{ticker}/orderflow/orderflow:
+    get:
+      summary: Get orderflow data for a ticker
+      description: Returns orderflow data for the specified ticker. All parameters are strictly enumerated. Security is handled via API key or cookie.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tickerInPath"
+        - $ref: "#/components/parameters/apiKey"
+      responses:
+        "200":
+          description: Orderflow data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderflowResponse"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+
+  /{ticker}/{package}/{category}/maxchange:
+    get:
+      summary: Get max change data for a ticker, package, and category
+      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tickerInPath"
+        - $ref: "#/components/parameters/packageInPath"
+        - $ref: "#/components/parameters/categoryInPath"
+        - $ref: "#/components/parameters/apiKey"
+      responses:
+        "200":
+          description: Max change data response
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /{ticker}/{package}/{category}/majors:
+    get:
+      summary: Get majors data for a ticker, package, and category
+      description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tickerInPath"
+        - $ref: "#/components/parameters/packageInPath"
+        - $ref: "#/components/parameters/categoryInPath"
+        - $ref: "#/components/parameters/apiKey"
+      responses:
+        "200":
+          description: Majors data response
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /tickers:
+    get:
+      summary: List all available ticker symbols
+      description: Returns the list of available ticker symbols supported by the API, including stocks, indexes, and futures.
+      tags:
+        - Public
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Format: "Bearer <YOUR_API_KEY>"'
+        - in: header
+          name: User-Agent
+          required: true
+          schema:
+            type: string
+          description: Identify your client application.
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+          description: Set to "application/json".
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stocks:
+                    type: array
+                    items:
+                      type: string
+                    description: Array of stock ticker symbols.
+                  indexes:
+                    type: array
+                    items:
+                      type: string
+                    description: Array of index ticker symbols.
+                  futures:
+                    type: array
+                    items:
+                      type: string
+                    description: Array of futures ticker symbols.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /v2/hist/{TICKER}/{PACKAGE}/{CATEGORY}/{DATE}:
+    get:
+      summary: Download historical data for a specific ticker, package, category, and date
+      description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day lookback window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
+      tags:
+        - Public
+      parameters:
+        - name: TICKER
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ticker symbol (e.g., SPX, AAPL).
+        - name: PACKAGE
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [classic, state, orderflow]
+          description: The data package to query.
+        - name: CATEGORY
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [gex_full, gex_zero, gex_one, delta_zero, gamma_zero, vanna_zero, charm_zero, delta_one, gamma_one, vanna_one, charm_one, orderflow]
+          description: The specific data category within the package.
+        - name: DATE
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: The date to query in YYYY-MM-DD format.
+        - name: noredirect
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional. If included, returns a JSON object with the URL instead of a 302 redirect.
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Format: "Bearer <YOUR_API_KEY>"'
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+          description: Set to "application/json".
+        - in: header
+          name: Accept-Encoding
+          required: false
+          schema:
+            type: string
+            enum: [gzip]
+          description: Optional. Set to "gzip" to receive compressed data.
+        - in: header
+          name: User-Agent
+          required: true
+          schema:
+            type: string
+          description: Identify your client application.
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+          description: Set to "application/json".
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: The temporary, pre-signed URL to download the requested historical data file.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /v2/negotiate:
+    get:
+      summary: Negotiate WebSocket connection for real-time feeds
+      description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard-compressed Protobufs. Each Quant subscriber is allowed 1 active connection per hub.
+      tags:
+        - Public
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: 'Format: "Bearer <YOUR_API_KEY>"'
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+          description: Set to "application/json".
+        - in: header
+          name: User-Agent
+          required: true
+          schema:
+            type: string
+          description: Identify your client application.
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+          description: Set to "application/json".
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  websocket_urls:
+                    type: object
+                    properties:
+                      classic:
+                        type: string
+                        format: uri
+                        description: Connection URL for the 'Classic GEX' hub.
+                      state_gex:
+                        type: string
+                        format: uri
+                        description: Connection URL for the 'State GEX Profile' hub.
+                      state_greeks_zero:
+                        type: string
+                        format: uri
+                        description: Connection URL for the 'State Greeks (0DTE)' hub.
+                      state_greeks_one:
+                        type: string
+                        format: uri
+                        description: Connection URL for the 'State Greeks (1DTE+)' hub.
+                      orderflow:
+                        type: string
+                        format: uri
+                        description: Connection URL for the 'Orderflow' hub.
+                  prefix:
+                    type: string
+                    description: Prefix string for each group (within a hub)
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+components:
+  schemas:
+    _float:
+      type: number
+      format: float
+    _double:
+      type: number
+      format: double
+    _int:
+      type: integer
+    _int32:
+      type: integer
+      format: int32
+    _int64:
+      type: integer
+      format: int32
+    _string:
+      type: string
+    apiKeyString:
+      type: string
+      format: password
+      minLength: 12
+      maxLength: 12
+    level:
+      type: string
+      enum:
+        - ORDERFLOW
+        - CLASSIC
+        - STATE
+    agg:
+      enum:
+        - day
+    ticker:
+      oneOf:
+        - $ref: "#/components/schemas/ticker_stock"
+        - $ref: "#/components/schemas/ticker_index"
+        - $ref: "#/components/schemas/ticker_variant"
+    ticker_variant:
+      type: string
+      minLength: 4
+      maxLength: 6
+      enum:
+        - ES_SPX
+        - NDXP
+        - NQ_NDX
+        - RUTW
+        - SPXW
+        - VIXW
+    ticker_index:
+      type: string
+      minLength: 3
+      maxLength: 3
+      enum:
+        - NDX
+        - RUT
+        - SPX
+        - VIX
+    ticker_stock:
+      type: string
+      minLength: 2
+      maxLength: 5
+      enum:
+        - AAPL
+        - AMD
+        - AMZN
+        - APP
+        - AVGO
+        - BABA
+        - COIN
+        - CRWD
+        - CRWV
+        - GLD
+        - GOOG
+        - GOOGL
+        - GME
+        - HOOD
+        - HYG
+        - IBIT
+        - INTC
+        - IONQ
+        - IWM
+        - META
+        - MSFT
+        - MSTR
+        - MU
+        - NFLX
+        - NVDA
+        - PLTR
+        - QQQ
+        - SLV
+        - SMCI
+        - SNOW
+        - SOFI
+        - SPY
+        - TLT
+        - TQQQ
+        - TSLA
+        - TSM
+        - UNH
+        - USO
+        - UVXY
+        - VALE
+    filter:
+      type: string
+      enum:
+        - majors
+        - maxchange
+      description: >
+        Filter:
+        * `majors` - filter to majors only
+        * `maxchange` - filter to max change only
+    category_state:
+      type: string
+      enum:
+        - volume
+        - volume_zero
+        - delta
+        - delta_zero
+        - gamma
+        - gamma_zero
+        - vanna
+        - vanna_zero
+        - charm
+        - charm_zero
+        - onevolume
+        - volume_one
+        - onedelta
+        - delta_one
+        - onegamma
+        - gamma_one
+        - onevanna
+        - vanna_one
+        - onecharm
+        - charm_one
+      description: >
+        Type:
+        * `volume` or `volume_zero` - 0dte volume
+        * `delta` or `delta_zero` - The delta
+        * `gamma` or `gamma_zero` - The gamma (long/short)
+        * `vanna` or `vanna_zero` - The vanna
+        * `charm` or `charm_zero`-  The charm
+        * `onedelta` or `delta_one` - 1dte delta
+        * `onegamma` or `gamma_one` - 1dte gamma (long/short)
+        * `onevanna` or `vanna_one` - 1dte vanna
+        * `onecharm` or `charm_one`- 1dte charm
+        * `onevolume` or `volume_one` - 1dte volume
+    BasicResponse:
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker'
+        min_dte:
+          $ref: '#/components/schemas/_int'
+        sec_min_dte:
+          $ref: '#/components/schemas/_int'
+        spot:
+          $ref: '#/components/schemas/_double'
+        zero_gamma:
+          $ref: '#/components/schemas/_float'
+        major_pos_vol:
+          $ref: '#/components/schemas/_float'
+        major_pos_oi:
+          $ref: '#/components/schemas/_float'
+        major_neg_vol:
+          $ref: '#/components/schemas/_float'
+        major_neg_oi:
+          $ref: '#/components/schemas/_float'
+        strikes:
+          $ref: '#/components/schemas/strikes'
+        sum_gex_vol:
+          $ref: '#/components/schemas/_float'
+        sum_gex_oi:
+          $ref: '#/components/schemas/_float'
+        delta_risk_reversal:
+          $ref: '#/components/schemas/_float'
+
+    OrderflowResponse:
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker_variant'
+        spot:
+          $ref: '#/components/schemas/_double'
+        z_mlgamma:
+          $ref: '#/components/schemas/_float'
+        z_msgamma:
+          $ref: '#/components/schemas/_float'
+        o_mlgamma:
+          $ref: '#/components/schemas/_float'
+        o_msgamma:
+          $ref: '#/components/schemas/_float'
+        zero_mcall:
+          $ref: '#/components/schemas/_float'
+        zero_mput:
+          $ref: '#/components/schemas/_float'
+        one_mcall:
+          $ref: '#/components/schemas/_float'
+        one_mput:
+          $ref: '#/components/schemas/_float'
+        zcvr:
+          $ref: '#/components/schemas/_float'
+        ocvr:
+          $ref: '#/components/schemas/_float'
+        zgr:
+          $ref: '#/components/schemas/_float'
+        ogr:
+          $ref: '#/components/schemas/_float'
+        zvanna:
+          $ref: '#/components/schemas/_float'
+        ovanna:
+          $ref: '#/components/schemas/_float'
+        zcharm:
+          $ref: '#/components/schemas/_float'
+        ocharm:
+          $ref: '#/components/schemas/_float'
+        agg_dex:
+          $ref: '#/components/schemas/_float'
+        one_agg_dex:
+          $ref: '#/components/schemas/_float'
+        agg_call_dex:
+          $ref: '#/components/schemas/_float'
+        one_agg_call_dex:
+          $ref: '#/components/schemas/_float'
+        agg_put_dex:
+          $ref: '#/components/schemas/_float'
+        one_agg_put_dex:
+          $ref: '#/components/schemas/_float'
+        net_dex:
+          $ref: '#/components/schemas/_float'
+        one_net_dex:
+          $ref: '#/components/schemas/_float'
+        net_call_dex:
+          $ref: '#/components/schemas/_float'
+        one_net_call_dex:
+          $ref: '#/components/schemas/_float'
+        net_put_dex:
+          $ref: '#/components/schemas/_float'
+        one_net_put_dex:
+          $ref: '#/components/schemas/_float'
+        dexoflow:
+          $ref: '#/components/schemas/_float'
+        gexoflow:
+          $ref: '#/components/schemas/_float'
+        cvroflow:
+          $ref: '#/components/schemas/_float'
+        one_dexoflow:
+          $ref: '#/components/schemas/_float'
+        one_gexoflow:
+          $ref: '#/components/schemas/_float'
+        one_cvroflow:
+          $ref: '#/components/schemas/_float'
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker'
+        min_dte:
+          $ref: '#/components/schemas/_int'
+        sec_min_dte:
+          $ref: '#/components/schemas/_int'
+        spot:
+          $ref: '#/components/schemas/_double'
+        zero_gamma:
+          $ref: '#/components/schemas/_float'
+        major_pos_vol:
+          $ref: '#/components/schemas/_float'
+        major_pos_oi:
+          $ref: '#/components/schemas/_float'
+        major_neg_vol:
+          $ref: '#/components/schemas/_float'
+        major_neg_oi:
+          $ref: '#/components/schemas/_float'
+        strikes:
+          $ref: '#/components/schemas/strikes'
+        sum_gex_vol:
+          $ref: '#/components/schemas/_float'
+        sum_gex_oi:
+          $ref: '#/components/schemas/_float'
+        delta_risk_reversal:
+          $ref: '#/components/schemas/_float'
+
+
+    category_classic:
+      type: string
+      enum:
+        - full
+        - gex_full
+        - zero
+        - gex_zero
+        - one
+        - gex_one
+      description: |
+        Classic GEX data category:
+        * `full` or `gex_full` - Full aggregation of GEX (call/put), up to 90 days out
+        * `zero` or `gex_zero` - Only next expiry+0 of GEX (call/put), 0dte
+        * `one` or `gex_one` - Only next expiry+1 of GEX (call/put)
+
+    category_orderflow:
+      type: string
+      enum:
+        - orderflow
+      description: |
+        Orderflow data category:
+        * `orderflow` - All orderflow metrics
+
+    timestamp:
+      type: integer
+      format: int64
+    min_dte:
+      $ref: "#/components/schemas/_int"
+    sec_min_dte:
+      $ref: "#/components/schemas/_int"
+    spot:
+      $ref: "#/components/schemas/_double"
+    zero_gamma:
+      $ref: "#/components/schemas/_float"
+    major_pos_vol:
+      $ref: "#/components/schemas/_float"
+    major_long_gamma:
+      $ref: "#/components/schemas/_float"
+    major_short_gamma:
+      $ref: "#/components/schemas/_float"
+    major_pos_oi:
+      $ref: "#/components/schemas/_float"
+    major_neg_vol:
+      $ref: "#/components/schemas/_float"
+    major_neg_oi:
+      $ref: "#/components/schemas/_float"
+    mini_contracts:
+      type: array
+      items:
+        type: array
+    strikes:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+          format: float
+    sum_gex_vol:
+      $ref: "#/components/schemas/_float"
+    sum_gex_oi:
+      $ref: "#/components/schemas/_float"
+    delta_risk_reversal:
+      $ref: "#/components/schemas/_float"
+    max_priors:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+          format: float
+    z_mlgamma:
+      type: integer
+    z_msgamma:
+      type: integer
+    o_mlgamma:
+      type: integer
+    o_msgamma:
+      type: integer
+    zero_mcall:
+      type: integer
+    zero_mput:
+      type: integer
+    one_mcall:
+      type: integer
+    one_mput:
+      type: integer
+    zcvr:
+      type: integer
+    ocvr:
+      type: integer
+    zgr:
+      type: integer
+    ogr:
+      type: integer
+    zvanna:
+      type: integer
+    ovanna:
+      type: integer
+    zcharm:
+      type: integer
+    ocharm:
+      type: integer
+    agg_dex:
+      type: integer
+    one_agg_dex:
+      type: integer
+    agg_call_dex:
+      type: integer
+    one_agg_call_dex:
+      type: integer
+    agg_put_dex:
+      type: integer
+    one_agg_put_dex:
+      type: integer
+    net_dex:
+      type: integer
+    one_net_dex:
+      type: integer
+    net_call_dex:
+      type: integer
+    one_net_call_dex:
+      type: integer
+    net_put_dex:
+      type: integer
+    one_net_put_dex:
+      type: integer
+    dexoflow:
+      type: integer
+    gexoflow:
+      type: integer
+    cvroflow:
+      type: integer
+    one_dexoflow:
+      type: integer
+    one_gexoflow:
+      type: integer
+    one_cvroflow:
+      type: integer
+  parameters:
+    tickerInPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ticker"
+    categoryInPath:
+      name: category
+      in: path
+      required: true
+      schema:
+        oneOf:
+          - $ref: "#/components/schemas/category_classic"
+          - $ref: "#/components/schemas/category_state"
+          - $ref: "#/components/schemas/category_orderflow"
+    packageInPath:
+      name: package
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - classic
+          - state
+          - orderflow
+        description: |
+          Data package type:
+          * `classic` - Classic subscription data
+          * `state` - State subscription data
+          * `orderflow` - Orderflow subscription data
+    subTypeInPath:
+      name: subtype
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - "gex_full"
+          - "full"
+          - "gex_zero"
+          - "zero"
+          - "gex_one"
+          - "one"
+    auth:
+      name: auth
+      in: cookie
+      required: true
+      schema:
+        type: string
+    apiKey:
+      name: key
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/apiKeyString"
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth
+    apiKeyAuth:
+      type: apiKey
+      in: query
+      name: key
+  responses:
+    "200":
+      description: OK
+    "200_Message":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    "202":
+      description: Accepted
+    "201":
+      description: Created
+    "401":
+      description: Unauthorized. User is not authenticated.
+    "403":
+      description: Forbidden. User does not have access to the resource.
+    "404":
+      description: Not Found
+    "400":
+      description: Bad Request
+    "400_Message":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    "409":
+      description: Conflict
+    "500":
+      description: Internal Server Error
+  headers:
+    Accept:
+      description: Content type accepted by the client
+      required: true
+      schema:
+        enum:
+          - application/json
+          - application/octet-stream
+        default: application/json
+        example: application/json
+security:
+  - cookieAuth: [ ]
+tags:
+  - name: Public
+    description: Public API operations
