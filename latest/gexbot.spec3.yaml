@@ -19,6 +19,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/classic_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Chart data response
@@ -43,6 +45,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/state_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Chart data response
@@ -67,6 +71,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/schemas/category_orderflow"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Orderflow data response
@@ -92,6 +98,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/classic_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Max change data response
@@ -116,6 +124,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/state_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Max change data response
@@ -140,6 +150,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/classic_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Majors data response
@@ -164,6 +176,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/state_category_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
           description: Majors data response
@@ -187,19 +201,8 @@ paths:
         - Public
       security: [ ]
       parameters:
-        - in: header
-          name: User-Agent
-          required: true
-          schema:
-            type: string
-          description: Identify your client application.
-        - in: header
-          name: Accept
-          required: true
-          schema:
-            type: string
-            enum: [ application/json ]
-          description: Set to "application/json".
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         '200':
           description: OK
@@ -268,19 +271,8 @@ paths:
             type: string
             enum: [ gzip ]
           description: Optional. Set to "gzip" to receive compressed data.
-        - name: User-Agent
-          in: header
-          required: true
-          schema:
-            type: string
-          description: Identify your client application.
-        - name: Accept
-          in: header
-          required: true
-          schema:
-            type: string
-            enum: [ application/json ]
-          description: Set to "application/json".
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         '200':
           description: OK
@@ -315,19 +307,8 @@ paths:
             type: string
             enum: [ application/json ]
           description: Set to "application/json".
-        - in: header
-          name: User-Agent
-          required: true
-          schema:
-            type: string
-          description: Identify your client application.
-        - in: header
-          name: Accept
-          required: true
-          schema:
-            type: string
-            enum: [ application/json ]
-          description: Set to "application/json".
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
       responses:
         '200':
           description: OK
@@ -431,13 +412,16 @@ components:
         - APP
         - AVGO
         - BABA
+        - BOIL
         - COIN
         - CRWD
         - CRWV
+        - DDOG
+        - DIA
         - GLD
+        - GME
         - GOOG
         - GOOGL
-        - GME
         - HOOD
         - HYG
         - IBIT
@@ -447,6 +431,34 @@ components:
         - META
         - MSFT
         - MSTR
+        - MU
+        - NFLX
+        - NVDA
+        - NVO
+        - ORCL
+        - PL
+        - PLTR
+        - QQQ
+        - RDDT
+        - ROKU
+        - SHOP
+        - SLV
+        - SMCI
+        - SNDK
+        - SNOW
+        - SOFI
+        - SPY
+        - TLT
+        - TQQQ
+        - TSLA
+        - TSM
+        - UBER
+        - UNG
+        - UNH
+        - USO
+        - UVXY
+        - VALE
+        - ZS
 
     majors_response:
       type: object
@@ -591,6 +603,8 @@ components:
           $ref: '#/components/schemas/_float'
         delta_risk_reversal:
           $ref: '#/components/schemas/_float'
+        max_priors:
+          $ref: '#/components/schemas/max_priors'
 
     orderflow_response:
       properties:
@@ -718,6 +732,11 @@ components:
     timestamp:
       type: integer
       format: int64
+    error_response:
+      type: object
+      properties:
+        error:
+          type: string
     min_dte:
       $ref: "#/components/schemas/_int"
     sec_min_dte:
@@ -888,6 +907,21 @@ components:
           - "zero"
           - "gex_one"
           - "one"
+    user_agent_header:
+      name: User-Agent
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Identify your client application.
+    accept_header:
+      name: Accept
+      in: header
+      required: true
+      schema:
+        type: string
+        enum: [ application/json ]
+      description: Set to "application/json".
   securitySchemes:
     bearer_auth:
       type: http
@@ -910,12 +944,28 @@ components:
       description: Created
     "401":
       description: Unauthorized. User is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_response"
     "403":
       description: Forbidden. User does not have access to the resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_response"
     "404":
       description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_response"
     "400":
       description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error_response"
     "400_Message":
       description: Bad Request
       content:
