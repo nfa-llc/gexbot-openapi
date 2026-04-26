@@ -1,4 +1,4 @@
-openapi: 3.0.1
+﻿openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
@@ -15,19 +15,18 @@ paths:
       summary: Get chart data for a ticker, package, and category
       description: Returns chart data for the specified ticker, package, and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
-        - apiKeyAuth: []
+        - bearer_auth: []
       parameters:
-        - $ref: "#/components/parameters/tickerInPath"
-        - $ref: "#/components/parameters/packageInPath"
-        - $ref: "#/components/parameters/categoryInPath"
-        - $ref: "#/components/parameters/apiKey"
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/category_in_path"
       responses:
         "200":
           description: Chart data response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: "#/components/schemas/basic_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -41,19 +40,18 @@ paths:
       summary: Get state data for a ticker and category
       description: Returns state data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
-        - apiKeyAuth: [ ]
+        - bearer_auth: [ ]
       parameters:
-        - $ref: "#/components/parameters/tickerInPath"
-        - $ref: "#/components/parameters/packageInPath"
-        - $ref: "#/components/parameters/categoryInPath"
-        - $ref: "#/components/parameters/apiKey"
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/category_in_path"
       responses:
         "200":
           description: Chart data response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: "#/components/schemas/basic_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -67,17 +65,16 @@ paths:
       summary: Get orderflow data for a ticker
       description: Returns orderflow data for the specified ticker. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
-        - apiKeyAuth: []
+        - bearer_auth: []
       parameters:
-        - $ref: "#/components/parameters/tickerInPath"
-        - $ref: "#/components/parameters/apiKey"
+        - $ref: "#/components/parameters/ticker_in_path"
       responses:
         "200":
           description: Orderflow data response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderflowResponse"
+                $ref: "#/components/schemas/orderflow_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -92,12 +89,11 @@ paths:
       summary: Get max change data for a ticker, package, and category
       description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
       security:
-        - apiKeyAuth: []
+        - bearer_auth: []
       parameters:
-        - $ref: "#/components/parameters/tickerInPath"
-        - $ref: "#/components/parameters/packageInPath"
-        - $ref: "#/components/parameters/categoryInPath"
-        - $ref: "#/components/parameters/apiKey"
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/category_in_path"
       responses:
         "200":
           description: Max change data response
@@ -114,12 +110,11 @@ paths:
       summary: Get majors data for a ticker, package, and category
       description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.
       security:
-        - apiKeyAuth: []
+        - bearer_auth: []
       parameters:
-        - $ref: "#/components/parameters/tickerInPath"
-        - $ref: "#/components/parameters/packageInPath"
-        - $ref: "#/components/parameters/categoryInPath"
-        - $ref: "#/components/parameters/apiKey"
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/category_in_path"
       responses:
         "200":
           description: Majors data response
@@ -137,13 +132,8 @@ paths:
       description: Returns the list of available ticker symbols supported by the API, including stocks, indexes, and futures.
       tags:
         - Public
+      security: []
       parameters:
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-          description: 'Format: "Bearer <YOUR_API_KEY>"'
         - in: header
           name: User-Agent
           required: true
@@ -186,34 +176,36 @@ paths:
           $ref: '#/components/responses/401'
         '403':
           $ref: '#/components/responses/403'
-  /v2/hist/{TICKER}/{PACKAGE}/{CATEGORY}/{DATE}:
+  /v2/hist/{ticker}/{package}/{category}/{date}:
     get:
       summary: Download historical data for a specific ticker, package, category, and date
       description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day lookback window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
       tags:
         - Public
+      security:
+        - bearer_auth: []
       parameters:
-        - name: TICKER
+        - name: ticker
           in: path
           required: true
           schema:
             type: string
           description: The ticker symbol (e.g., SPX, AAPL).
-        - name: PACKAGE
+        - name: package
           in: path
           required: true
           schema:
             type: string
             enum: [classic, state, orderflow]
           description: The data package to query.
-        - name: CATEGORY
+        - name: category
           in: path
           required: true
           schema:
             type: string
             enum: [gex_full, gex_zero, gex_one, delta_zero, gamma_zero, vanna_zero, charm_zero, delta_one, gamma_one, vanna_one, charm_one, orderflow]
           description: The specific data category within the package.
-        - name: DATE
+        - name: date
           in: path
           required: true
           schema:
@@ -226,12 +218,6 @@ paths:
           schema:
             type: string
           description: Optional. If included, returns a JSON object with the URL instead of a 302 redirect.
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-          description: 'Format: "Bearer <YOUR_API_KEY>"'
         - in: header
           name: Content-Type
           required: true
@@ -283,13 +269,9 @@ paths:
       description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard-compressed Protobufs. Each Quant subscriber is allowed 1 active connection per hub.
       tags:
         - Public
+      security:
+        - bearer_auth: []
       parameters:
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-          description: 'Format: "Bearer <YOUR_API_KEY>"'
         - in: header
           name: Content-Type
           required: true
@@ -368,11 +350,6 @@ components:
       format: int32
     _string:
       type: string
-    apiKeyString:
-      type: string
-      format: password
-      minLength: 12
-      maxLength: 12
     level:
       type: string
       enum:
@@ -496,7 +473,7 @@ components:
         * `onevanna` or `vanna_one` - 1dte vanna
         * `onecharm` or `charm_one`- 1dte charm
         * `onevolume` or `volume_one` - 1dte volume
-    BasicResponse:
+    basic_response:
       type: object
       properties:
         timestamp:
@@ -528,13 +505,12 @@ components:
         delta_risk_reversal:
           $ref: '#/components/schemas/_float'
 
-    OrderflowResponse:
-      type: object
+    orderflow_response:
       properties:
         timestamp:
           $ref: '#/components/schemas/timestamp'
         ticker:
-          $ref: '#/components/schemas/ticker_variant'
+          $ref: '#/components/schemas/ticker'
         spot:
           $ref: '#/components/schemas/_double'
         z_mlgamma:
@@ -605,18 +581,10 @@ components:
           $ref: '#/components/schemas/_float'
         one_cvroflow:
           $ref: '#/components/schemas/_float'
-      type: object
-      properties:
-        timestamp:
-          $ref: '#/components/schemas/timestamp'
-        ticker:
-          $ref: '#/components/schemas/ticker'
         min_dte:
           $ref: '#/components/schemas/_int'
         sec_min_dte:
           $ref: '#/components/schemas/_int'
-        spot:
-          $ref: '#/components/schemas/_double'
         zero_gamma:
           $ref: '#/components/schemas/_float'
         major_pos_vol:
@@ -635,6 +603,8 @@ components:
           $ref: '#/components/schemas/_float'
         delta_risk_reversal:
           $ref: '#/components/schemas/_float'
+      type: object
+
 
 
     category_classic:
@@ -776,13 +746,13 @@ components:
     one_cvroflow:
       type: integer
   parameters:
-    tickerInPath:
+    ticker_in_path:
       name: ticker
       in: path
       required: true
       schema:
         $ref: "#/components/schemas/ticker"
-    categoryInPath:
+    category_in_path:
       name: category
       in: path
       required: true
@@ -791,7 +761,7 @@ components:
           - $ref: "#/components/schemas/category_classic"
           - $ref: "#/components/schemas/category_state"
           - $ref: "#/components/schemas/category_orderflow"
-    packageInPath:
+    package_in_path:
       name: package
       in: path
       required: true
@@ -806,7 +776,7 @@ components:
           * `classic` - Classic subscription data
           * `state` - State subscription data
           * `orderflow` - Orderflow subscription data
-    subTypeInPath:
+    sub_type_in_path:
       name: subtype
       in: path
       required: true
@@ -819,27 +789,10 @@ components:
           - "zero"
           - "gex_one"
           - "one"
-    auth:
-      name: auth
-      in: cookie
-      required: true
-      schema:
-        type: string
-    apiKey:
-      name: key
-      in: query
-      required: false
-      schema:
-        $ref: "#/components/schemas/apiKeyString"
   securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: auth
-    apiKeyAuth:
-      type: apiKey
-      in: query
-      name: key
+    bearer_auth:
+      type: http
+      scheme: bearer
   responses:
     "200":
       description: OK
@@ -888,7 +841,7 @@ components:
         default: application/json
         example: application/json
 security:
-  - cookieAuth: [ ]
+  - bearer_auth: [ ]
 tags:
   - name: Public
     description: Public API operations

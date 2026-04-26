@@ -11,11 +11,11 @@
 
 ## API Patterns & Conventions
 - All endpoints are parameterized by `{ticker}`, `{package}`, and `{category}` (see `paths`).
-- Security is handled via `apiKeyAuth` (query param `key`) or `cookieAuth` (cookie `auth`).
+- Security is handled via `bearer_auth` (HTTP Bearer token in the `Authorization` header). The `/tickers` endpoint is the only endpoint that does not require authentication (`security: []`).
 - Tickers, packages, and categories are strictly enumerated in the spec (see `components/schemas`).
 - Categories are grouped into `classic`, `state`, and `orderflow` packages, each with their own allowed values.
 - Filters like `majors` and `maxchange` are supported for some endpoints.
-- Responses are standardized and reference shared schemas (e.g., `BasicResponse`).
+- Responses are standardized and reference shared schemas (e.g., `basic_response`).
 
 ## Developer Workflows
 - There are no build, test, or code generation scripts in this repo. It is a static OpenAPI spec repository.
@@ -26,6 +26,10 @@
 - The API is intended to be consumed by clients integrating with the NFA gexbot service at `https://api.gexbot.com` or `https://api.gex.bot/v2`.
 - All integration details (parameters, security, response formats) are discoverable in the OpenAPI spec.
 
+## Naming Conventions
+- All user-defined identifiers (schema names, parameter names, security scheme names, response names, property names) **must** use `snake_case`.
+- Do not use camelCase or PascalCase for user-defined names. OpenAPI spec keywords (e.g., `oneOf`, `minLength`, `maxLength`, `termsOfService`, `type: apiKey`) are exempt as they are defined by the OpenAPI specification itself.
+
 ## Project-Specific Guidance for AI Agents
 - Always reference `latest/gexbot.spec3.yaml` for any API details, including allowed values and parameter requirements.
 - Do not assume additional endpoints, parameters, or workflows beyond what is defined in the spec.
@@ -35,9 +39,9 @@
 
 ## Example Patterns
 - Endpoint: `/{ticker}/{package}/{category}` (GET)
-  - Parameters: `ticker`, `package`, `category`, `key` (optional, for apiKeyAuth)
-  - Security: `apiKeyAuth` or `cookieAuth`
-  - Response: `BasicResponse` schema
+  - Parameters: `ticker`, `package`, `category`
+  - Security: `bearer_auth` (Bearer token)
+  - Response: `basic_response` schema
 - Ticker enum example: `AAPL`, `AMD`, `AMZN`, ... (see `ticker_stock`)
 - Package enum example: `classic`, `state`, `orderflow`
 - Category enum example: `full`, `gex_full`, `zero`, ... (see `category_classic`, etc.)
