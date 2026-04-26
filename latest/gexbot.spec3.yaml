@@ -12,14 +12,13 @@ servers:
 paths:
   /{ticker}/classic/{category}:
     get:
-      summary: Get chart data for a ticker, package, and category
-      description: Returns chart data for the specified ticker, package, and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
+      summary: Get chart data for a ticker and category
+      description: Returns chart data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.
       security:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/package_in_path"
-        - $ref: "#/components/parameters/category_in_path"
+        - $ref: "#/components/parameters/classic_category_in_path"
       responses:
         "200":
           description: Chart data response
@@ -43,8 +42,7 @@ paths:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/package_in_path"
-        - $ref: "#/components/parameters/category_in_path"
+        - $ref: "#/components/parameters/state_category_in_path"
       responses:
         "200":
           description: Chart data response
@@ -85,16 +83,15 @@ paths:
       tags:
         - Public
 
-  /{ticker}/{package}/{category}/maxchange:
+  /{ticker}/classic/{category}/maxchange:
     get:
-      summary: Get max change data for a ticker, package, and category
-      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
+      summary: Get max change data for a ticker and category
+      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker and category.
       security:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/package_in_path"
-        - $ref: "#/components/parameters/category_in_path"
+        - $ref: "#/components/parameters/classic_category_in_path"
       responses:
         "200":
           description: Max change data response
@@ -110,7 +107,31 @@ paths:
           $ref: "#/components/responses/403"
       tags:
         - Public
-  /{ticker}/{package}/{category}/majors:
+  /{ticker}/state/{category}/maxchange:
+    get:
+      summary: Get max change data for a ticker, package, and category
+      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
+      security:
+        - bearer_auth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/state_category_in_path"
+      responses:
+        "200":
+          description: Max change data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/maxchange_response"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /{ticker}/classic/{category}/majors:
     get:
       summary: Get majors data for a ticker, package, and category
       description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.
@@ -118,8 +139,31 @@ paths:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/package_in_path"
-        - $ref: "#/components/parameters/category_in_path"
+        - $ref: "#/components/parameters/classic_category_in_path"
+      responses:
+        "200":
+          description: Majors data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/majors_response"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+      tags:
+        - Public
+  /{ticker}/state/{category}/majors:
+    get:
+      summary: Get majors data for a ticker, package, and category
+      description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.
+      security:
+        - bearer_auth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/state_category_in_path"
       responses:
         "200":
           description: Majors data response
@@ -194,26 +238,9 @@ paths:
       security:
         - bearer_auth: [ ]
       parameters:
-        - name: ticker
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ticker symbol (e.g., SPX, AAPL).
-        - name: package
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [ classic, state, orderflow ]
-          description: The data package to query.
-        - name: category
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [ gex_full, gex_zero, gex_one, delta_zero, gamma_zero, vanna_zero, charm_zero, delta_one, gamma_one, vanna_one, charm_one, orderflow ]
-          description: The specific data category within the package.
+        - $ref: "#/components/parameters/ticker_in_path"
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/category_in_path"
         - name: date
           in: path
           required: true
@@ -227,28 +254,28 @@ paths:
           schema:
             type: string
           description: Optional. If included, returns a JSON object with the URL instead of a 302 redirect.
-        - in: header
-          name: Content-Type
+        - name: Content-Type
+          in: header
           required: true
           schema:
             type: string
             enum: [ application/json ]
           description: Set to "application/json".
-        - in: header
-          name: Accept-Encoding
+        - name: Accept-Encoding
+          in: header
           required: false
           schema:
             type: string
             enum: [ gzip ]
           description: Optional. Set to "gzip" to receive compressed data.
-        - in: header
-          name: User-Agent
+        - name: User-Agent
+          in: header
           required: true
           schema:
             type: string
           description: Identify your client application.
-        - in: header
-          name: Accept
+        - name: Accept
+          in: header
           required: true
           schema:
             type: string
@@ -819,6 +846,20 @@ components:
           - $ref: "#/components/schemas/category_classic"
           - $ref: "#/components/schemas/category_state"
           - $ref: "#/components/schemas/category_orderflow"
+    classic_category_in_path:
+      name: category
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/category_classic"
+    state_category_in_path:
+      name: category
+      in: path
+      required: true
+      schema:
+        oneOf:
+          - $ref: "#/components/schemas/category_classic"
+          - $ref: "#/components/schemas/category_state"
     package_in_path:
       name: package
       in: path
