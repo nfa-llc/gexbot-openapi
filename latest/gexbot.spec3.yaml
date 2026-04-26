@@ -2,7 +2,7 @@
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 1.2.0
+  version: 2.2.0
   termsOfService: "https://www.gexbot.com/terms-and-conditions"
 servers:
   - url: https://api.gexbot.com
@@ -35,7 +35,10 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - Classic
+        - State
+        - Orderflow
+        - Quant
   /{ticker}/state/{category}:
     get:
       summary: Get state data for a ticker and category
@@ -61,7 +64,9 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - State
+        - Orderflow
+        - Quant
   /{ticker}/orderflow/{category}:
     get:
       summary: Get orderflow data for a ticker
@@ -87,7 +92,8 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - Orderflow
+        - Quant
 
   /{ticker}/classic/{category}/maxchange:
     get:
@@ -114,7 +120,10 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - Classic
+        - State
+        - Orderflow
+        - Quant
   /{ticker}/state/{category}/maxchange:
     get:
       summary: Get max change data for a ticker, package, and category
@@ -140,7 +149,9 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - State
+        - Orderflow
+        - Quant
   /{ticker}/classic/{category}/majors:
     get:
       summary: Get majors data for a ticker, package, and category
@@ -166,7 +177,10 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - Classic
+        - State
+        - Orderflow
+        - Quant
   /{ticker}/state/{category}/majors:
     get:
       summary: Get majors data for a ticker, package, and category
@@ -192,7 +206,9 @@ paths:
         "403":
           $ref: "#/components/responses/403"
       tags:
-        - Public
+        - State
+        - Orderflow
+        - Quant
   /tickers:
     get:
       summary: List all available ticker symbols
@@ -237,7 +253,7 @@ paths:
       summary: Download historical data for a specific ticker, package, category, and date
       description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day lookback window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
       tags:
-        - Public
+        - Quant
       security:
         - bearer_auth: [ ]
       parameters:
@@ -296,7 +312,7 @@ paths:
       summary: Negotiate WebSocket connection for real-time feeds
       description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard-compressed Protobufs. Each Quant subscriber is allowed 1 active connection per hub.
       tags:
-        - Public
+        - Quant
       security:
         - bearer_auth: [ ]
       parameters:
@@ -992,4 +1008,12 @@ security:
   - bearer_auth: [ ]
 tags:
   - name: Public
-    description: Public API operations
+    description: Endpoints that do not require authentication, such as listing available tickers and downloading historical data.
+  - name: Classic
+    description: Available with Classic Subscription
+  - name: State
+    description: Available with State Subscription
+  - name: Orderflow
+    description: Available with Orderflow Subscription
+  - name: Quant
+    description: Available with Quant Subscription
