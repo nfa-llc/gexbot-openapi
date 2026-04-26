@@ -5,8 +5,6 @@ info:
   version: 2.2.0
   termsOfService: "https://www.gexbot.com/terms-and-conditions"
 servers:
-  - url: https://api.gexbot.com
-    description: Primary v1 API server
   - url: https://api.gex.bot/v2
     description: Primary v2 API server
 paths:
