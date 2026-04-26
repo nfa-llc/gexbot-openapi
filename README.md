@@ -1,3 +1,11 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/_inline_3-1_dark.webp" />
+    <source media="(prefers-color-scheme: light)" srcset=".github/_inline_3-1_light.webp" />
+    <img src=".github/_inline_3-1_light.webp" alt="gexbot" />
+  </picture>
+</p>
+
 # gexbot-openapi
 
 The NFA gexbot OpenAPI Specification.
