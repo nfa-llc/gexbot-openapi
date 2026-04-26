@@ -441,26 +441,22 @@ components:
     category_state:
       type: string
       enum:
-        - volume
-        - volume_zero
+        - charm
+        - charm_one
+        - charm_zero
         - delta
+        - delta_one
         - delta_zero
         - gamma
-        - gamma_zero
-        - vanna
-        - vanna_zero
-        - charm
-        - charm_zero
-        - onevolume
-        - volume_one
-        - onedelta
-        - delta_one
-        - onegamma
         - gamma_one
-        - onevanna
-        - vanna_one
+        - gamma_zero
         - onecharm
-        - charm_one
+        - onedelta
+        - onegamma
+        - onevanna
+        - vanna
+        - vanna_one
+        - vanna_zero
       description: >
         Type:
         * `volume` or `volume_zero` - 0dte volume
