@@ -98,7 +98,7 @@ paths:
   /{ticker}/classic/{category}/maxchange:
     get:
       summary: Get max change data for a ticker and category
-      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker and category.
+      description: Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker and category.
       security:
         - bearer_auth: [ ]
       parameters:
@@ -127,7 +127,7 @@ paths:
   /{ticker}/state/{category}/maxchange:
     get:
       summary: Get max change data for a ticker, package, and category
-      description: Returns the strikes with the most significant GEX change over various lookback periods for the specified ticker, package, and category.
+      description: Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker, package, and category.
       security:
         - bearer_auth: [ ]
       parameters:
@@ -251,7 +251,7 @@ paths:
   /hist/{ticker}/{package}/{category}/{date}:
     get:
       summary: Download historical data for a specific ticker, package, category, and date
-      description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day lookback window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
+      description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day look-back window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
       tags:
         - Quant
       security:
@@ -310,7 +310,7 @@ paths:
   /negotiate:
     get:
       summary: Negotiate WebSocket connection for real-time feeds
-      description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard-compressed Protobufs. Each Quant subscriber is allowed 1 active connection per hub.
+      description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard (zstd) compressed Protocol Buffers (Protobuf). Each Quant subscriber is allowed 1 active connection per hub.
       tags:
         - Quant
       security:
@@ -578,7 +578,6 @@ components:
         - vanna_zero
       description: >
         Type:
-        * `volume` or `volume_zero` - 0dte volume
         * `delta` or `delta_zero` - The delta
         * `gamma` or `gamma_zero` - The gamma (long/short)
         * `vanna` or `vanna_zero` - The vanna
@@ -587,7 +586,6 @@ components:
         * `onegamma` or `gamma_one` - 1dte gamma (long/short)
         * `onevanna` or `vanna_one` - 1dte vanna
         * `onecharm` or `charm_one`- 1dte charm
-        * `onevolume` or `volume_one` - 1dte volume
     basic_response:
       type: object
       properties:
