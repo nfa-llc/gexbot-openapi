@@ -248,7 +248,7 @@ paths:
           $ref: '#/components/responses/401'
         '403':
           $ref: '#/components/responses/403'
-  /v2/hist/{ticker}/{package}/{category}/{date}:
+  /hist/{ticker}/{package}/{category}/{date}:
     get:
       summary: Download historical data for a specific ticker, package, category, and date
       description: Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day lookback window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.
@@ -307,7 +307,7 @@ paths:
           $ref: '#/components/responses/401'
         '403':
           $ref: '#/components/responses/403'
-  /v2/negotiate:
+  /negotiate:
     get:
       summary: Negotiate WebSocket connection for real-time feeds
       description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard-compressed Protobufs. Each Quant subscriber is allowed 1 active connection per hub.
