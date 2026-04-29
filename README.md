@@ -32,18 +32,18 @@ All endpoints (except `/tickers`) require a valid gexbot API key in the `Authori
 
 ### endpoints
 
-| Endpoint                                     | Description                          |
-|----------------------------------------------|--------------------------------------|
-| `/{ticker}/classic/{category}`               | Classic GEX chart data               |
-| `/{ticker}/state/{category}`                 | State greeks chart data              |
-| `/{ticker}/orderflow/{category}`             | Orderflow metrics                    |
-| `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)             |
-| `/{ticker}/state/{category}/majors`          | Key GEX levels (state)               |
-| `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic) |
-| `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)   |
-| `/tickers`                                   | List available ticker symbols        |
+| Endpoint                                    | Description                          |
+|---------------------------------------------|--------------------------------------|
+| `/{ticker}/classic/{category}`              | Classic GEX chart data               |
+| `/{ticker}/state/{category}`                | State greeks chart data              |
+| `/{ticker}/orderflow/orderflow`             | Orderflow metrics                    |
+| `/{ticker}/classic/{category}/majors`       | Key GEX levels (classic)             |
+| `/{ticker}/state/{category}/majors`         | Key GEX levels (state)               |
+| `/{ticker}/classic/{category}/maxchange`    | Max GEX change by lookback (classic) |
+| `/{ticker}/state/{category}/maxchange`      | Max GEX change by lookback (state)   |
+| `/tickers`                                  | List available ticker symbols        |
 | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data             |
-| `/negotiate`                                 | Negotiate WebSocket connection       |
+| `/negotiate`                                | Negotiate WebSocket connection       |
 
 ### example
 
