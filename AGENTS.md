@@ -21,6 +21,9 @@
 - Error responses use the shared `error_response` schema (`{"error": "..."}`).
 - Response schemas: `basic_response`, `orderflow_response`, `majors_response`, `maxchange_response`.
 - Tags represent subscription tiers: `Public`, `Classic`, `State`, `Orderflow`, `Quant`.
+- **Rate limiting**: Data is not updated more than once per second. Requests should not exceed one request per second
+  per ticker per metric.
+- **HTTP client configuration**: Request timeouts should be configured to no more than 1 second.
 
 ## developer workflows
 - To update the API, edit `latest/gexbot.spec3.yaml` directly.
@@ -38,6 +41,9 @@
 - Do not assume additional endpoints, parameters, or workflows beyond what is defined in the spec.
 - When documenting or generating code, use the exact enums and schema names from the spec.
 - If extending the API, follow the existing structure and conventions in the spec.
+- Respect rate limits: do not make more than one request per second per ticker per metric (data updates once per
+  second).
+- Configure HTTP client timeouts to 1 second or less.
 - Keep the JSON spec in sync with the YAML spec after changes.
 
 ## example patterns
