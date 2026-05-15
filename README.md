@@ -102,6 +102,10 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 - **Orderflow** — Orderflow metrics
 - **Quant** — Full access including historical data and WebSocket feeds
 
+## websocket real-time feed
+
+See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
+
 ## related repositories
 
 - [quant-python-sockets](https://github.com/nfa-llc/quant-python-sockets) — Python client for real-time WebSocket feeds
