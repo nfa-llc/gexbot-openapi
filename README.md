@@ -43,7 +43,9 @@ All endpoints (except `/tickers`) require a valid gexbot API key in the `Authori
 | `/{ticker}/state/{category}/maxchange`      | Max GEX change by lookback (state)   |
 | `/tickers`                                  | List available ticker symbols        |
 | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data             |
-| `/negotiate`                                | Negotiate WebSocket connection       |
+| `POST /negotiate`                           | Negotiate WebSocket URLs and initial groups |
+| `PATCH /negotiate`                          | Replace active WebSocket groups without reconnecting |
+| `GET /negotiate`                            | Legacy WebSocket negotiation (deprecated) |
 
 ### example
 
@@ -103,6 +105,8 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 - **Quant** — Full access including historical data and WebSocket feeds
 
 ## websocket real-time feed
+
+Quant API users should use `POST /negotiate` to receive authorized hub URLs and auto-join initial groups. Use `PATCH /negotiate` to replace active group subscriptions without reconnecting. Legacy `GET /negotiate` is deprecated.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
 

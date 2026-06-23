@@ -4,14 +4,161 @@
 >
 > ⚠️ Data is only published during New York Stock Exchange cash hours (9:30 AM–4:00 PM ET).
 
-Provides real-time, low-latency market data via WebSocket.
+Provides real-time, low-latency market data via Azure Web PubSub.
 
-## connecting
+## recommended flow
 
-1. Make a `GET /negotiate` request (with required headers) to receive connection URLs and the group `PREFIX`.
-2. Connect to a hub (e.g., `classic`, `state`) and join groups (e.g., `blue_SPX_state_gamma_zero`) to subscribe.
+1. Build the complete initial set of unprefixed groups you want.
+2. `POST /v2/negotiate` with `{"groups": [...]}`.
+3. Connect to the returned hub URLs. The response includes every hub URL authorized for your API key.
+4. Listen for group messages. Requested groups are auto-joined by the server; do **not** call `joinGroup` for this POST flow.
+5. To change groups without reconnecting, `PATCH /v2/negotiate` with the complete desired `{ hub, group }` set.
 
-### negotiate response
+## group format
+
+POST groups are unprefixed and use:
+
+```text
+{ticker}_{package}_{category}
+```
+
+Examples:
+
+```text
+SPX_classic_gex_full
+SPX_state_gamma_zero
+ES_SPX_orderflow_orderflow
+```
+
+Hub mapping:
+
+| Hub | Group examples |
+|---|---|
+| `classic` | `SPX_classic_gex_full`, `SPX_classic_gex_zero`, `SPX_classic_gex_one` |
+| `state_gex` | `SPX_state_gex_full`, `SPX_state_gex_zero`, `SPX_state_gex_one` |
+| `state_greeks_zero` | `SPX_state_delta_zero`, `SPX_state_gamma_zero`, `SPX_state_vanna_zero`, `SPX_state_charm_zero` |
+| `state_greeks_one` | `SPX_state_delta_one`, `SPX_state_gamma_one`, `SPX_state_vanna_one`, `SPX_state_charm_one` |
+| `orderflow` | `ES_SPX_orderflow_orderflow`, `SPX_orderflow_orderflow` |
+
+Volume groups are not available on the API WebSocket feed.
+
+## POST /v2/negotiate
+
+### request
+
+```http
+POST https://api.gex.bot/v2/negotiate
+Authorization: Bearer <YOUR_API_KEY>
+User-Agent: my-app/1.0
+Accept: application/json
+Content-Type: application/json
+```
+
+```json
+{
+  "groups": [
+    "SPX_classic_gex_full",
+    "SPX_state_gamma_zero",
+    "ES_SPX_orderflow_orderflow"
+  ]
+}
+```
+
+### response
+
+```json
+{
+  "websocket_urls": {
+    "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
+    "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
+    "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
+    "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
+    "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
+  }
+}
+```
+
+The response includes all hubs authorized for your API key. Initial groups from the POST body are auto-joined only on their matching hubs.
+
+## PATCH /v2/negotiate
+
+Use PATCH to replace active group subscriptions without reconnecting. This is a **full replacement** request: any currently-active group not present in the payload is removed server-side.
+
+### request
+
+```http
+PATCH https://api.gex.bot/v2/negotiate
+Authorization: Bearer <YOUR_API_KEY>
+User-Agent: my-app/1.0
+Accept: application/json
+Content-Type: application/json
+```
+
+```json
+{
+  "groups": [
+    { "hub": "classic", "group": "SPX_classic_gex_full" },
+    { "hub": "state_greeks_zero", "group": "SPX_state_gamma_zero" },
+    { "hub": "orderflow", "group": "ES_SPX_orderflow_orderflow" }
+  ]
+}
+```
+
+### response
+
+```json
+{
+  "updated_groups": 3,
+  "hubs": {
+    "classic": 1,
+    "state_gex": 0,
+    "state_greeks_zero": 1,
+    "state_greeks_one": 0,
+    "orderflow": 1
+  }
+}
+```
+
+The `hub` value must match the group. For example, `SPX_classic_gex_full` must use hub `classic`.
+
+## group limits
+
+- Standard Quant API keys are limited to 50 active groups.
+- Commercial or contracted API keys may have a custom group limit.
+- Duplicate groups count once.
+- Limits apply independently per API websocket slot.
+
+Over-limit requests return `403 Forbidden`.
+
+## messages
+
+Messages are [Zstandard](https://facebook.github.io/zstd/)-compressed [Protobufs](https://protobuf.dev/).
+
+## connection behavior
+
+- A successful POST negotiate closes existing API websocket connections for the same API websocket slot before issuing new URLs.
+- PATCH replaces group memberships without reconnecting and does not issue new URLs.
+- WebSocket URLs must be used before their connection token expires. If a connection is dropped after token expiration, negotiate again.
+- Connect to the hub URLs returned by a single POST response. Connecting to additional hubs from that same response does not require another negotiate call.
+
+## diagnosing with wscat
+
+[wscat](https://github.com/websockets/wscat) can verify that a negotiated URL connects. For the POST flow, groups are server-joined; do not send `joinGroup`.
+
+```sh
+wscat -c "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>" \
+      --subprotocol json.webpubsub.azure.v1
+```
+
+Binary messages are expected because payloads are compressed Protobufs.
+
+## legacy GET /v2/negotiate
+
+`GET /v2/negotiate` is deprecated and exists only for legacy clients. It returns a `prefix` and broad client-side join permissions so older clients can send Azure Web PubSub `joinGroup` messages.
+
+New clients should use POST/PATCH. Do not build new integrations around legacy GET.
+
+Legacy response shape:
 
 ```json
 {
@@ -26,114 +173,28 @@ Provides real-time, low-latency market data via WebSocket.
 }
 ```
 
-## messages
-
-Messages are [Zstandard](https://facebook.github.io/zstd/)-compressed [Protobufs](https://protobuf.dev/).
-
-## connection limits
-
-- Each Quant subscriber is allowed **1 active connection per hub**. Additional requests to `/negotiate` will kick all existing connections.
-- To maintain multiple hub connections simultaneously, use the authorized hub endpoints from a **single** negotiate request and connect to each hub within **15 minutes**.
-- If a hub connection is dropped more than 15 minutes after negotiating, you must re-negotiate and re-connect to each hub.
-
-## diagnosing with wscat
-
-[wscat](https://github.com/websockets/wscat) is a command-line WebSocket client useful for verifying connectivity, join/leave group flow, and raw message delivery without writing any application code.
-
-### install
-
-```sh
-npm install -g wscat
-```
-
-### connect to a hub
-
-Use the full URL from the `/negotiate` response and specify the Azure Web PubSub subprotocol:
-
-```sh
-wscat -c "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>" \
-      --subprotocol json.webpubsub.azure.v1
-```
-
-Replace `<access_token>` with the token from the corresponding `websocket_urls` entry in the negotiate response. Swap `orderflow` for any other hub name as needed.
-
-### join a group
-
-Once connected, send a `joinGroup` message. The `group` name must use the `prefix` returned by `/negotiate`:
-
-```json
-{"type":"joinGroup","group":"blue_SPX_orderflow_orderflow","ackId":1}
-```
-
-A successful join returns an ack:
-
-```json
-{"type":"ack","ackId":1,"success":true}
-```
-
-If `success` is `false`, double-check the hub/group pairing and that the prefix matches the negotiate response.
-
-### what to look for
-
-| Symptom | Likely cause |
-|---|---|
-| Connection closes immediately | Token expired or `/negotiate` was called again after connecting |
-| Ack returns `success: false` | Wrong hub for the group, or malformed group name |
-| Connection succeeds but no messages arrive | Outside NYSE cash hours, or group name prefix is wrong/hardcoded |
-| Binary messages received | Expected — messages are Zstandard-compressed Protobufs and won't be human-readable in wscat |
+Legacy group names must prepend the returned prefix, e.g. `blue_SPX_orderflow_orderflow`.
 
 ## common problems
 
-### connections dropped immediately after connecting
+### over-limit errors
 
-**Cause:** Calling `/negotiate` more than once before all hub connections are established.
+**Cause:** The POST or PATCH request contains more groups than allowed for the API key.
 
-Each call to `/negotiate` invalidates all previously issued access tokens and kicks any existing connections. If you negotiate a second time while still connecting to hubs from the first response, those connections will be dropped.
-
-**Fix:** Call `/negotiate` exactly once, store the full response, then open all desired hub connections using the URLs from that single response. Only re-negotiate when a connection expires (beyond 15 minutes) or is lost.
+**Fix:** Send fewer groups, or contact us if your commercial or contracted plan requires a custom group limit.
 
 ---
 
-### not receiving messages after connecting
+### no messages after connecting
 
-**Cause:** Subscribing to groups on the wrong hub, or using a hardcoded prefix instead of the one returned by `/negotiate`.
+**Cause:** The group was not included in the POST negotiate body or the latest PATCH replacement body, or the client is connected to the wrong hub.
 
-Each hub only routes messages for its own groups:
-
-| Hub                 | Group prefix pattern                             | Example group                      |
-|---------------------|--------------------------------------------------|------------------------------------|
-| `classic`           | `{prefix}_{ticker}_classic_{category}`           | `blue_SPX_classic_gex_full`        |
-| `state_gex`         | `{prefix}_{ticker}_state_gex_{category}`         | `blue_SPX_state_gex_gamma`         |
-| `state_greeks_zero` | `{prefix}_{ticker}_state_greeks_zero_{category}` | `blue_SPX_state_greeks_zero_delta` |
-| `state_greeks_one`  | `{prefix}_{ticker}_state_greeks_one_{category}`  | `blue_SPX_state_greeks_one_delta`  |
-| `orderflow`         | `{prefix}_{ticker}_orderflow_{category}`         | `blue_SPX_orderflow_orderflow`     |
-
-Joining a `state_gex` group on the `classic` hub (or vice versa) will silently succeed but never deliver messages.
-
-**Fix:** Always connect to the hub that matches the group you want, and always construct group names dynamically using the `prefix` field from the `/negotiate` response — do not hardcode it. The prefix can change between negotiate calls.
+**Fix:** Ensure every desired group is included in the current full group set and that the hub matches the group package/category.
 
 ---
 
-### can I connect to multiple hubs simultaneously on one Quant subscription?
+### subscriptions disappear after PATCH
 
-Yes. You are allowed 1 active connection per hub, so you can hold connections to all hubs at the same time from a single subscription.
+**Cause:** PATCH is a full replacement. Omitted groups are removed.
 
----
-
-### is there a total connection limit beyond 1 per hub?
-
-No. The only limit is 1 connection per hub. There is no additional cap on the number of hubs you connect to concurrently.
-
----
-
-### does opening a new hub connection ever invalidate an existing one?
-
-No, with one important exception: calling `/negotiate` again.
-
-- **Connecting to a different hub** (e.g., connecting to `state_gex` while already connected to `classic`) using the *same* original `/negotiate` response will **not** affect your existing connection.
-- **Connecting to the same hub again** using the same URL from the `/negotiate` response will disconnect your previous connection to that specific hub, because you are only allowed one active connection per hub.
-- **Calling `/negotiate` a second time** to get new credentials will immediately invalidate **all** access tokens from the first response and kick **all** active connections.
-
-
-
-
+**Fix:** Send every group you want to remain subscribed to in every PATCH request.

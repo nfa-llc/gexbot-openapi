@@ -2,7 +2,7 @@
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.2.0
+  version: 2.3.0
   termsOfService: "https://www.gexbot.com/terms-and-conditions"
 servers:
   - url: https://api.gex.bot/v2
@@ -306,57 +306,106 @@ paths:
         '403':
           $ref: '#/components/responses/403'
   /negotiate:
-    get:
-      summary: Negotiate WebSocket connection for real-time feeds
-      description: Provides real-time, low-latency market data via WebSocket. First, make a GET /negotiate request (with headers) to receive connection URLs and the group prefix. Then, connect to a hub (e.g., classic, state) and join groups to subscribe. Messages are Zstandard (zstd) compressed Protocol Buffers (Protobuf). Each Quant subscriber is allowed 1 active connection per hub.
+    post:
+      summary: Negotiate WebSocket connection URLs and initial groups
+      description: |
+        Provides real-time, low-latency market data via WebSocket. Send the full initial set of unprefixed websocket group names in the request body. The response returns all hub URLs authorized for the API key, and requested groups are auto-joined on their matching hubs. Clients should connect to the returned hub URLs and should not call client-side joinGroup for this POST flow.
+
+        Group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Standard Quant API keys are limited to 50 groups. Commercial or contracted API keys may have a custom group limit.
       tags:
         - Quant
       security:
         - bearer_auth: [ ]
       parameters:
-        - in: header
-          name: Content-Type
-          required: true
-          schema:
-            type: string
-            enum: [ application/json ]
-          description: Set to "application/json".
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/websocket_negotiate_request"
+            examples:
+              groups:
+                value:
+                  groups:
+                    - SPX_classic_gex_full
+                    - SPX_state_gamma_zero
+                    - ES_SPX_orderflow_orderflow
+      responses:
+        '200':
+          description: WebSocket connection URLs for all authorized hubs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/websocket_negotiate_response"
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+    patch:
+      summary: Replace active WebSocket group subscriptions without reconnecting
+      description: |
+        Replaces the active group memberships for the current API websocket slot without issuing new WebSocket URLs. The request body is the complete desired set of active subscriptions. Any group omitted from the PATCH payload is removed server-side.
+
+        Each group entry must include the hub the client is connected to and the unprefixed group name. The hub must match the group package/category. The same group limits as POST negotiation apply. Standard Quant API keys are limited to 50 groups. Commercial or contracted API keys may have a custom group limit.
+      tags:
+        - Quant
+      security:
+        - bearer_auth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/websocket_group_update_request"
+            examples:
+              replace_groups:
+                value:
+                  groups:
+                    - hub: classic
+                      group: SPX_classic_gex_full
+                    - hub: state_greeks_zero
+                      group: SPX_state_gamma_zero
+                    - hub: orderflow
+                      group: ES_SPX_orderflow_orderflow
+      responses:
+        '200':
+          description: Active websocket group memberships replaced.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/websocket_group_update_response"
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+    get:
+      summary: Legacy WebSocket negotiation with client-side group joins
+      deprecated: true
+      description: |
+        Deprecated compatibility path. Returns connection URLs and a group prefix for legacy clients that manually send Azure Web PubSub joinGroup messages after connecting. New clients should use POST /negotiate and PATCH /negotiate instead.
+      tags:
+        - Quant
+      security:
+        - bearer_auth: [ ]
+      parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
         '200':
-          description: OK
+          description: Legacy WebSocket connection URLs and group prefix.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  websocket_urls:
-                    type: object
-                    properties:
-                      classic:
-                        type: string
-                        format: uri
-                        description: Connection URL for the 'Classic GEX' hub.
-                      state_gex:
-                        type: string
-                        format: uri
-                        description: Connection URL for the 'State GEX Profile' hub.
-                      state_greeks_zero:
-                        type: string
-                        format: uri
-                        description: Connection URL for the 'State Greeks (0DTE)' hub.
-                      state_greeks_one:
-                        type: string
-                        format: uri
-                        description: Connection URL for the 'State Greeks (1DTE+)' hub.
-                      orderflow:
-                        type: string
-                        format: uri
-                        description: Connection URL for the 'Orderflow' hub.
-                  prefix:
-                    type: string
-                    description: Prefix string for each group (within a hub)
+                $ref: "#/components/schemas/websocket_legacy_negotiate_response"
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -740,6 +789,145 @@ components:
       description: |
         Orderflow data category:
         * `orderflow` - All orderflow metrics
+
+    websocket_hub:
+      type: string
+      enum:
+        - classic
+        - state_gex
+        - state_greeks_zero
+        - state_greeks_one
+        - orderflow
+      description: Public WebSocket hub name.
+    websocket_group_name:
+      type: string
+      example: SPX_state_gamma_zero
+      description: Unprefixed websocket group name in `{ticker}_{package}_{category}` format.
+    websocket_urls:
+      type: object
+      description: Map of hub name to signed WebSocket URL. Contains every hub authorized for the API key.
+      properties:
+        classic:
+          type: string
+          format: uri
+          description: Connection URL for the Classic GEX hub.
+        state_gex:
+          type: string
+          format: uri
+          description: Connection URL for the State GEX Profile hub.
+        state_greeks_zero:
+          type: string
+          format: uri
+          description: Connection URL for the State Greeks 0DTE hub.
+        state_greeks_one:
+          type: string
+          format: uri
+          description: Connection URL for the State Greeks 1DTE+ hub.
+        orderflow:
+          type: string
+          format: uri
+          description: Connection URL for the Orderflow hub.
+    websocket_negotiate_request:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/websocket_group_name"
+          description: Complete initial set of groups to auto-join after connecting to the returned hub URLs.
+      example:
+        groups:
+          - SPX_classic_gex_full
+          - SPX_state_gamma_zero
+          - ES_SPX_orderflow_orderflow
+    websocket_negotiate_response:
+      type: object
+      required:
+        - websocket_urls
+      properties:
+        websocket_urls:
+          $ref: "#/components/schemas/websocket_urls"
+      example:
+        websocket_urls:
+          classic: wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>
+          state_gex: wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>
+          state_greeks_zero: wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>
+          state_greeks_one: wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>
+          orderflow: wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>
+    websocket_group_update_item:
+      type: object
+      required:
+        - hub
+        - group
+      properties:
+        hub:
+          $ref: "#/components/schemas/websocket_hub"
+        group:
+          $ref: "#/components/schemas/websocket_group_name"
+    websocket_group_update_request:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/websocket_group_update_item"
+          description: Complete desired group set. Omitted groups are removed from active subscriptions.
+      example:
+        groups:
+          - hub: classic
+            group: SPX_classic_gex_full
+          - hub: state_greeks_zero
+            group: SPX_state_gamma_zero
+          - hub: orderflow
+            group: ES_SPX_orderflow_orderflow
+    websocket_group_update_response:
+      type: object
+      required:
+        - updated_groups
+        - hubs
+      properties:
+        updated_groups:
+          type: integer
+          format: int32
+          description: Total number of active groups after replacement.
+        hubs:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+          description: Count of active groups by hub after replacement.
+      example:
+        updated_groups: 3
+        hubs:
+          classic: 1
+          state_gex: 0
+          state_greeks_zero: 1
+          state_greeks_one: 0
+          orderflow: 1
+    websocket_legacy_negotiate_response:
+      type: object
+      required:
+        - websocket_urls
+        - prefix
+      properties:
+        websocket_urls:
+          $ref: "#/components/schemas/websocket_urls"
+        prefix:
+          type: string
+          description: Legacy prefix to prepend to group names when sending joinGroup messages.
+      example:
+        websocket_urls:
+          classic: wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>
+          state_gex: wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>
+          state_greeks_zero: wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>
+          state_greeks_one: wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>
+          orderflow: wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>
+        prefix: blue
 
     timestamp:
       type: integer
