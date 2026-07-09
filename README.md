@@ -205,7 +205,7 @@ Accept: application/json
 | `skew_adj`          | boolean | Apply skew adjustment                                                               |
 | `limit_y`           | boolean | Limit y-axis range                                                                  |
 | `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                            |
-| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25`         |
+| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                                     |
 
 ### subscription tiers
 
