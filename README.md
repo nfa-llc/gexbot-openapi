@@ -140,7 +140,6 @@ Accept: application/json
 | `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                   |
 | `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25` |
 | `model`             | string  | Pricing model: `gbR`, `theo`, `last`, `classic`, `state`   |
-| `debug`             | boolean | Enable debug output                                        |
 | `series`            | string  | Series type: `deltas`, `moneyness`, `strikes`              |
 
 ### subscription tiers

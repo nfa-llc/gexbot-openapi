@@ -449,11 +449,6 @@ paths:
               - last
               - classic
               - state
-        - name: debug
-          in: query
-          required: false
-          schema:
-            type: boolean
         - name: series
           in: query
           required: false
