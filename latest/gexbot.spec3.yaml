@@ -434,10 +434,6 @@ paths:
               - itm
               - ntm
               - otm
-              - d10
-              - d15
-              - d20
-              - d25
         - name: model
           in: query
           required: false
