@@ -305,6 +305,174 @@ paths:
           $ref: '#/components/responses/401'
         '403':
           $ref: '#/components/responses/403'
+  /research/{ticker}/{metric}:
+    get:
+      summary: Get research chart data for a ticker and metric
+      description: Returns research chart data for the specified ticker and metric. Supports various output formats, chart types, and filtering options.
+      security:
+        - bearer_auth: [ ]
+      tags:
+        - Research
+      parameters:
+        - $ref: "#/components/parameters/research_ticker_in_path"
+        - name: metric
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/research_metric"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - png
+              - jpeg
+              - svg
+              - pdf
+              - html
+              - json
+              - csv
+              - plotly
+              - webp
+        - name: view
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - skew
+              - term
+              - surface
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - line
+              - histogram
+              - scatter
+              - bar
+        - name: chart_type
+          in: query
+          required: false
+          description: Rendering engine used to generate the chart.
+          schema:
+            type: string
+            enum:
+              - matplotlib
+              - plotly
+        - name: theme
+          in: query
+          required: false
+          description: Chart color theme. Defaults to dark.
+          schema:
+            type: string
+            default: dark
+            enum:
+              - light
+              - dark
+        - name: strikes
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: start_dte
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: end_dte
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: expiration_filter
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: contract_agg
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: expiry_agg
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: skew_adj
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: limit_y
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: contract_filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - calls
+              - puts
+              - all
+        - name: moneyness_filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - atm
+              - itm
+              - ntm
+              - otm
+              - d10
+              - d15
+              - d20
+              - d25
+        - name: model
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - gbR
+              - theo
+              - last
+              - classic
+              - state
+        - name: debug
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: series
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - deltas
+              - moneyness
+              - strikes
+      responses:
+        "200":
+          description: Research chart data response
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+
   /negotiate:
     post:
       summary: Negotiate WebSocket connection URLs and initial groups
@@ -782,6 +950,139 @@ components:
         * `zero` or `gex_zero` - Only next expiry+0 of GEX (call/put), 0dte
         * `one` or `gex_one` - Only next expiry+1 of GEX (call/put)
 
+    research_ticker:
+      type: string
+      minLength: 1
+      maxLength: 10
+      pattern: "^[a-zA-Z0-9_^.]+$"
+      description: Ticker symbol for research data. Accepts any valid ticker string including stocks, indexes, futures, and variants.
+    research_metric:
+      type: string
+      enum:
+        - charm_ask
+        - color_ask
+        - delta_ask
+        - gamma_ask
+        - iv_ask
+        - rho_ask
+        - speed_ask
+        - theta_ask
+        - ultima_ask
+        - vanna_ask
+        - vega_ask
+        - vomma_ask
+        - zomma_ask
+        - charm_bid
+        - color_bid
+        - delta_bid
+        - gamma_bid
+        - iv_bid
+        - rho_bid
+        - speed_bid
+        - theta_bid
+        - ultima_bid
+        - vanna_bid
+        - vega_bid
+        - vomma_bid
+        - zomma_bid
+        - charm_ex_both
+        - charm_ex_both_skew_adj
+        - charm_ex_oi
+        - charm_ex_oi_skew_adj
+        - charm_ex_vol
+        - charm_ex_vol_skew_adj
+        - color_ex_both
+        - color_ex_both_skew_adj
+        - color_ex_oi
+        - color_ex_oi_skew_adj
+        - color_ex_vol
+        - color_ex_vol_skew_adj
+        - dex_both
+        - dex_both_skew_adj
+        - dex_oi
+        - dex_oi_skew_adj
+        - dex_vol
+        - dex_vol_skew_adj
+        - gamma_wall_abs
+        - gex_both
+        - gex_both_skew_adj
+        - gex_oi
+        - gex_oi_skew_adj
+        - gex_vol
+        - gex_vol_skew_adj
+        - intrinsic_value
+        - last_price
+        - max_pain
+        - charm_mid
+        - color_mid
+        - delta_mid
+        - gamma_mid
+        - iv_mid
+        - rho_mid
+        - speed_mid
+        - theta_mid
+        - ultima_mid
+        - vanna_mid
+        - vega_mid
+        - vomma_mid
+        - zomma_mid
+        - open_interest
+        - oi
+        - gamma_flip
+        - parity
+        - put_call_parity
+        - rho_ex_both
+        - rho_ex_both_skew_adj
+        - rho_ex_oi
+        - rho_ex_oi_skew_adj
+        - rho_ex_vol
+        - rho_ex_vol_skew_adj
+        - speed_ex_both
+        - speed_ex_both_skew_adj
+        - speed_ex_oi
+        - speed_ex_oi_skew_adj
+        - speed_ex_vol
+        - speed_ex_vol_skew_adj
+        - tex_both
+        - tex_both_skew_adj
+        - tex_oi
+        - tex_oi_skew_adj
+        - tex_vol
+        - tex_vol_skew_adj
+        - time_value
+        - ultima_ex_both
+        - ultima_ex_both_skew_adj
+        - ultima_ex_oi
+        - ultima_ex_oi_skew_adj
+        - ultima_ex_vol
+        - ultima_ex_vol_skew_adj
+        - vanna_ex_both
+        - vanna_ex_both_skew_adj
+        - vanna_ex_oi
+        - vanna_ex_oi_skew_adj
+        - vanna_ex_vol
+        - vanna_ex_vol_skew_adj
+        - vex_both
+        - vex_both_skew_adj
+        - vex_oi
+        - vex_oi_skew_adj
+        - vex_vol
+        - vex_vol_skew_adj
+        - volatility_trigger
+        - volume
+        - vomma_ex_both
+        - vomma_ex_both_skew_adj
+        - vomma_ex_oi
+        - vomma_ex_oi_skew_adj
+        - vomma_ex_vol
+        - vomma_ex_vol_skew_adj
+        - zomma_ex_both
+        - zomma_ex_both_skew_adj
+        - zomma_ex_oi
+        - zomma_ex_oi_skew_adj
+        - zomma_ex_vol
+        - zomma_ex_vol_skew_adj
+      description: Research metric identifier for chart data generation.
     category_orderflow:
       type: string
       enum:
@@ -1050,6 +1351,12 @@ components:
     one_cvroflow:
       type: integer
   parameters:
+    research_ticker_in_path:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/research_ticker"
     ticker_in_path:
       name: ticker
       in: path
@@ -1201,3 +1508,5 @@ tags:
     description: Available with Orderflow Subscription
   - name: Quant
     description: Available with Quant Subscription
+  - name: Research
+    description: Available with Research Addon. Provides chart and analytical data for options metrics across various formats and views.

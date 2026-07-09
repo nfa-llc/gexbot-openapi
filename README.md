@@ -13,7 +13,10 @@ The NFA gexbot OpenAPI Specification.
 ## overview
 
 This repository contains the [OpenAPI 3.0.1](https://spec.openapis.org/oas/v3.0.1) specification for the NFA gexbot API,
-which provides options-derived market data including GEX (Gamma Exposure), greeks, and orderflow metrics.
+which covers two product offerings:
+
+- **gexbot** — Options-derived market data including GEX (Gamma Exposure), greeks, and orderflow metrics for enumerated tickers.
+- **gexbot research** (`gbR`) — Chart and analytical data for a broad range of options metrics across any supported ticker, with flexible output formats, views, and filtering.
 
 ## spec
 
@@ -28,28 +31,37 @@ https://api.gex.bot/v2
 
 ### authentication
 
-All endpoints (except `/tickers`) require a valid gexbot API key in the `Authorization` header.
+All endpoints (except `/tickers`) require a valid API key passed as a Bearer token in the `Authorization` header.
+Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`) key for the `/research` endpoints. Keys are not interchangeable between products.
 
 ### endpoints
 
-| Endpoint                                    | Description                          |
-|---------------------------------------------|--------------------------------------|
-| `/{ticker}/classic/{category}`              | Classic GEX chart data               |
-| `/{ticker}/state/{category}`                | State greeks chart data              |
-| `/{ticker}/orderflow/orderflow`             | Orderflow metrics                    |
-| `/{ticker}/classic/{category}/majors`       | Key GEX levels (classic)             |
-| `/{ticker}/state/{category}/majors`         | Key GEX levels (state)               |
-| `/{ticker}/classic/{category}/maxchange`    | Max GEX change by lookback (classic) |
-| `/{ticker}/state/{category}/maxchange`      | Max GEX change by lookback (state)   |
-| `/tickers`                                  | List available ticker symbols        |
+#### gexbot
+
+| Endpoint                                     | Description                          |
+|----------------------------------------------|--------------------------------------|
+| `/{ticker}/classic/{category}`               | Classic GEX chart data               |
+| `/{ticker}/state/{category}`                 | State greeks chart data              |
+| `/{ticker}/orderflow/orderflow`              | Orderflow metrics                    |
+| `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)             |
+| `/{ticker}/state/{category}/majors`          | Key GEX levels (state)               |
+| `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic) |
+| `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)   |
+| `/tickers`                                   | List available ticker symbols        |
 | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data             |
 | `POST /negotiate`                           | Negotiate WebSocket URLs and initial groups |
 | `PATCH /negotiate`                          | Replace active WebSocket groups without reconnecting |
 | `GET /negotiate`                            | Legacy WebSocket negotiation (deprecated) |
 
+#### gexbot research (gbR)
+
+| Endpoint                      | Description                                        |
+|-------------------------------|----------------------------------------------------|
+| `/research/{ticker}/{metric}` | Research chart data for a ticker and metric        |
+
 ### example
 
-**Request**
+**gexbot — Request**
 
 ```http request
 GET https://api.gex.bot/v2/SPX/classic/gex_full
@@ -58,7 +70,7 @@ User-Agent: my-app/1.0
 Accept: application/json
 ```
 
-> **Note:** Your API key must include both the prefix `gexbot_custom_` and your secret key in the `Authorization`
+> **Note:** Your gexbot API key must include both the prefix `gexbot_custom_` and your secret key in the `Authorization`
 > header (e.g., `gexbot_custom_your-secret-key`).
 
 **Response**
@@ -95,6 +107,42 @@ Accept: application/json
 }
 ```
 
+### gexbot research (gbR) example
+
+**Request**
+
+```http request
+GET https://api.gex.bot/v2/research/SPX/gex_both
+Authorization: Bearer <your-gbR-api-key>
+User-Agent: my-app/1.0
+Accept: application/json
+```
+
+> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key. This is separate from your gexbot API key and is not interchangeable.
+
+**Query parameters (all optional)**
+
+| Parameter           | Type    | Description                                                |
+|---------------------|---------|------------------------------------------------------------|
+| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `html`, `json`, `csv`, `plotly`, `webp` |
+| `view`              | string  | Chart view: `skew`, `term`, `surface`                      |
+| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`          |
+| `chart_type`        | string  | Rendering engine: `matplotlib`, `plotly`                   |
+| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)             |
+| `strikes`           | number  | Number of strikes to include                               |
+| `start_dte`         | number  | Start DTE filter                                           |
+| `end_dte`           | number  | End DTE filter                                             |
+| `expiration_filter` | string  | Expiration date filter                                     |
+| `contract_agg`      | boolean | Aggregate by contract                                      |
+| `expiry_agg`        | boolean | Aggregate by expiry                                        |
+| `skew_adj`          | boolean | Apply skew adjustment                                      |
+| `limit_y`           | boolean | Limit y-axis range                                         |
+| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                   |
+| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25` |
+| `model`             | string  | Pricing model: `gbR`, `theo`, `last`, `classic`, `state`   |
+| `debug`             | boolean | Enable debug output                                        |
+| `series`            | string  | Series type: `deltas`, `moneyness`, `strikes`              |
+
 ### subscription tiers
 
 Subscriptions are available for different data packages at https://www.gexbot.com/:
@@ -103,6 +151,7 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 - **State** — State greeks data
 - **Orderflow** — Orderflow metrics
 - **Quant** — Full access including historical data and WebSocket feeds
+- **Research** — gexbot research (`gbR`) access for chart and analytical data across any ticker and metric
 
 ## websocket real-time feed
 
