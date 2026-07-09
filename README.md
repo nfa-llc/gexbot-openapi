@@ -15,8 +15,10 @@ The NFA gexbot OpenAPI Specification.
 This repository contains the [OpenAPI 3.0.1](https://spec.openapis.org/oas/v3.0.1) specification for the NFA gexbot API,
 which covers two product offerings:
 
-- **gexbot** — Options-derived market data including GEX (Gamma Exposure), greeks, and orderflow metrics for enumerated tickers.
-- **gexbot research** (`gbR`) — Chart and analytical data for a broad range of options metrics across any supported ticker, with flexible output formats, views, and filtering.
+- **gexbot** — Options-derived market data including GEX (Gamma Exposure), greeks, and orderflow metrics for enumerated
+  tickers.
+- **gexbot research** (`gbR`) — Chart and analytical data for a broad range of options metrics across any supported
+  ticker, with flexible output formats, views, and filtering.
 
 ## spec
 
@@ -32,32 +34,33 @@ https://api.gex.bot/v2
 ### authentication
 
 All endpoints (except `/tickers`) require a valid API key passed as a Bearer token in the `Authorization` header.
-Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`) key for the `/research` endpoints. Keys are not interchangeable between products.
+Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`)
+key for the `/research` endpoints. Keys are not interchangeable between products.
 
 ### endpoints
 
 #### gexbot
 
-| Endpoint                                     | Description                          |
-|----------------------------------------------|--------------------------------------|
-| `/{ticker}/classic/{category}`               | Classic GEX chart data               |
-| `/{ticker}/state/{category}`                 | State greeks chart data              |
-| `/{ticker}/orderflow/orderflow`              | Orderflow metrics                    |
-| `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)             |
-| `/{ticker}/state/{category}/majors`          | Key GEX levels (state)               |
-| `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic) |
-| `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)   |
-| `/tickers`                                   | List available ticker symbols        |
-| `/hist/{ticker}/{package}/{category}/{date}` | Download historical data             |
-| `POST /negotiate`                           | Negotiate WebSocket URLs and initial groups |
-| `PATCH /negotiate`                          | Replace active WebSocket groups without reconnecting |
-| `GET /negotiate`                            | Legacy WebSocket negotiation (deprecated) |
+| Endpoint                                     | Description                                          |
+|----------------------------------------------|------------------------------------------------------|
+| `/{ticker}/classic/{category}`               | Classic GEX chart data                               |
+| `/{ticker}/state/{category}`                 | State greeks chart data                              |
+| `/{ticker}/orderflow/orderflow`              | Orderflow metrics                                    |
+| `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)                             |
+| `/{ticker}/state/{category}/majors`          | Key GEX levels (state)                               |
+| `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic)                 |
+| `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                   |
+| `/tickers`                                   | List available ticker symbols                        |
+| `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                             |
+| `POST /negotiate`                            | Negotiate WebSocket URLs and initial groups          |
+| `PATCH /negotiate`                           | Replace active WebSocket groups without reconnecting |
+| `GET /negotiate`                             | Legacy WebSocket negotiation (deprecated)            |
 
 #### gexbot research (gbR)
 
-| Endpoint                      | Description                                        |
-|-------------------------------|----------------------------------------------------|
-| `/research/{ticker}/{metric}` | Research chart data for a ticker and metric        |
+| Endpoint                      | Description                                 |
+|-------------------------------|---------------------------------------------|
+| `/research/{ticker}/{metric}` | Research chart data for a ticker and metric |
 
 ### example
 
@@ -88,21 +91,84 @@ Accept: application/json
   "major_neg_vol": 7100,
   "major_neg_oi": 6900,
   "strikes": [
-    [6890,-228.01,-86.9,[-240.55,-243.15,-245.22,-221.27,-220.12]],
-    [6895,-48.47,69.76,[-49.05,-46.76,-45.55,-45.53,-42.97]],
+    [
+      6890,
+      -228.01,
+      -86.9,
+      [
+        -240.55,
+        -243.15,
+        -245.22,
+        -221.27,
+        -220.12
+      ]
+    ],
+    [
+      6895,
+      -48.47,
+      69.76,
+      [
+        -49.05,
+        -46.76,
+        -45.55,
+        -45.53,
+        -42.97
+      ]
+    ],
     // Trimmed for brevity
-    [7380,44.16,75.99,[0,47.7,47.3,0,40.55]],
-    [7385,5.5,14.27,[0,0,0,0,0]]],
+    [
+      7380,
+      44.16,
+      75.99,
+      [
+        0,
+        47.7,
+        47.3,
+        0,
+        40.55
+      ]
+    ],
+    [
+      7385,
+      5.5,
+      14.27,
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  ],
   "sum_gex_vol": 1712585.519,
   "sum_gex_oi": 51521.105,
   "delta_risk_reversal": 0.118,
   "max_priors": [
-    [7140,170979.742],
-    [7135,1145886.722],
-    [7135,997473.336],
-    [7135,1106210.715],
-    [7135,1128504.809],
-    [7135,1131150.488]
+    [
+      7140,
+      170979.742
+    ],
+    [
+      7135,
+      1145886.722
+    ],
+    [
+      7135,
+      997473.336
+    ],
+    [
+      7135,
+      1106210.715
+    ],
+    [
+      7135,
+      1128504.809
+    ],
+    [
+      7135,
+      1131150.488
+    ]
   ]
 }
 ```
@@ -118,29 +184,28 @@ User-Agent: my-app/1.0
 Accept: application/json
 ```
 
-> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key. This is separate from your gexbot API key and is not interchangeable.
+> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key. This is separate from
+> your gexbot API key and is not interchangeable.
 
 **Query parameters (all optional)**
 
-| Parameter           | Type    | Description                                                |
-|---------------------|---------|------------------------------------------------------------|
+| Parameter           | Type    | Description                                                                         |
+|---------------------|---------|-------------------------------------------------------------------------------------|
 | `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `html`, `json`, `csv`, `plotly`, `webp` |
-| `view`              | string  | Chart view: `skew`, `term`, `surface`                      |
-| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`          |
-| `chart_type`        | string  | Rendering engine: `matplotlib`, `plotly`                   |
-| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)             |
-| `strikes`           | number  | Number of strikes to include                               |
-| `start_dte`         | number  | Start DTE filter                                           |
-| `end_dte`           | number  | End DTE filter                                             |
-| `expiration_filter` | string  | Expiration date filter                                     |
-| `contract_agg`      | boolean | Aggregate by contract                                      |
-| `expiry_agg`        | boolean | Aggregate by expiry                                        |
-| `skew_adj`          | boolean | Apply skew adjustment                                      |
-| `limit_y`           | boolean | Limit y-axis range                                         |
-| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                   |
-| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25` |
-| `model`             | string  | Pricing model: `gbR`, `theo`, `last`, `classic`, `state`   |
-| `series`            | string  | Series type: `deltas`, `moneyness`, `strikes`              |
+| `view`              | string  | Chart view: `skew`, `term`, `surface`                                               |
+| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                                   |
+| `chart_type`        | string  | Rendering engine: `matplotlib`, `plotly`                                            |
+| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                                      |
+| `strikes`           | number  | Number of strikes to include                                                        |
+| `start_dte`         | number  | Start DTE filter                                                                    |
+| `end_dte`           | number  | End DTE filter                                                                      |
+| `expiration_filter` | string  | Expiration date filter                                                              |
+| `contract_agg`      | boolean | Aggregate by contract                                                               |
+| `expiry_agg`        | boolean | Aggregate by expiry                                                                 |
+| `skew_adj`          | boolean | Apply skew adjustment                                                               |
+| `limit_y`           | boolean | Limit y-axis range                                                                  |
+| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                            |
+| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25`         |
 
 ### subscription tiers
 
@@ -154,7 +219,8 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 
 ## websocket real-time feed
 
-Quant API users should use `POST /negotiate` to receive authorized hub URLs and auto-join initial groups. Use `PATCH /negotiate` to replace active group subscriptions without reconnecting. Legacy `GET /negotiate` is deprecated.
+Quant API users should use `POST /negotiate` to receive authorized hub URLs and auto-join initial groups. Use
+`PATCH /negotiate` to replace active group subscriptions without reconnecting. Legacy `GET /negotiate` is deprecated.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
 
