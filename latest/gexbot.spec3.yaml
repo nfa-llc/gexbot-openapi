@@ -434,26 +434,6 @@ paths:
               - itm
               - ntm
               - otm
-        - name: model
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - gbR
-              - theo
-              - last
-              - classic
-              - state
-        - name: series
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - deltas
-              - moneyness
-              - strikes
       responses:
         "200":
           description: Research chart data response
