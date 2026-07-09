@@ -184,7 +184,7 @@ User-Agent: my-app/1.0
 Accept: application/json
 ```
 
-> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key. This is separate from
+> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key with `research_` prefix. This is separate from
 > your gexbot API key and is not interchangeable.
 
 **Query parameters (all optional)**
