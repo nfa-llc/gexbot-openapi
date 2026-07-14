@@ -33,7 +33,7 @@ https://api.gex.bot/v2
 
 ### authentication
 
-All endpoints (except `/tickers`) require a valid API key passed as a Bearer token in the `Authorization` header.
+All endpoints except `/tickers` and `/{package}/categories` require a valid API key passed as a Bearer token in the `Authorization` header.
 Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`)
 key for the `/research` endpoints. Keys are not interchangeable between products.
 
@@ -51,6 +51,9 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic)                 |
 | `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                   |
 | `/tickers`                                   | List available ticker symbols                        |
+| `/{package}/categories`                      | List available data category names for a package     |
+| `GET https://api.gex.bot/tickers/quant`      | List Quant ticker symbols                            |
+| `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups          |
 | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                             |
 | `POST /negotiate`                            | Negotiate WebSocket URLs and initial groups          |
 | `PATCH /negotiate`                           | Replace active WebSocket groups without reconnecting |
@@ -221,6 +224,11 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 
 Quant API users should use `POST /negotiate` to receive authorized hub URLs and auto-join initial groups. Use
 `PATCH /negotiate` to replace active group subscriptions without reconnecting. Legacy `GET /negotiate` is deprecated.
+
+Realtime WebSocket groups include the standard full/zero/one groups plus explicit-expiry groups such as
+`SPX_state_gamma_20260717`. Explicit-expiry State Greeks groups use the `state_greeks` hub, while standard
+0DTE/1DTE State Greeks remain on `state_greeks_zero`/`state_greeks_one`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates and
+`GET https://api.gex.bot/tickers/quant` to discover additional Quant tickers.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
 

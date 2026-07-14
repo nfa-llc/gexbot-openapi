@@ -246,6 +246,115 @@ paths:
           $ref: '#/components/responses/401'
         '403':
           $ref: '#/components/responses/403'
+  /{package}/categories:
+    servers:
+      - url: https://api.gex.bot
+        description: Primary API server for non-v2 routes
+    get:
+      summary: List data categories for a package
+      description: Returns the available data category names for a package. Use these names when building REST requests or WebSocket groups.
+      tags:
+        - Public
+      security: [ ]
+      parameters:
+        - $ref: "#/components/parameters/package_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+      responses:
+        '200':
+          description: Data category names for the requested package.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/data_category"
+              example:
+                - gex_full
+                - gex_zero
+                - gex_one
+                - delta_zero
+                - gamma_zero
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /tickers/quant:
+    servers:
+      - url: https://api.gex.bot
+        description: Primary API server for non-v2 routes
+    get:
+      summary: List Quant ticker symbols
+      description: |
+        Returns additional stock and index ticker symbols available to Quant subscribers on the realtime WebSocket feed. These tickers are WebSocket/PubSub-only: they can publish standard realtime groups and explicit-expiry realtime groups, but are not REST chart/history endpoints.
+
+        This route is served at `GET https://api.gex.bot/tickers/quant`.
+      tags:
+        - Quant
+      security:
+        - bearer_auth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+      responses:
+        '200':
+          description: Quant ticker symbols.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/quant_tickers_response"
+              example:
+                stocks:
+                  - SOXL
+                  - LLY
+                  - FUTU
+                indexes:
+                  - XSP
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+  /options/{ticker}/expiries:
+    get:
+      summary: List all valid option expiries for realtime expiry groups
+      description: |
+        Returns all valid option expiration dates for a canonical option-owning ticker over the currently-published horizon: the current Eastern calendar date through current Eastern date + 90 calendar days.
+
+        Use the returned `YYYY-MM-DD` dates to build explicit-expiry WebSocket group suffixes by removing dashes, e.g. `2026-07-17` becomes `20260717`. Use canonical option-owning tickers such as `SPX`, `NDX`, `SPY`, `QQQ`, Quant-only stock tickers, or the Quant-only `XSP` index.
+      tags:
+        - Quant
+      security:
+        - bearer_auth: [ ]
+      parameters:
+        - $ref: "#/components/parameters/option_ticker_in_path"
+        - $ref: "#/components/parameters/user_agent_header"
+        - $ref: "#/components/parameters/accept_header"
+      responses:
+        '200':
+          description: All valid option expiries for the ticker within the published horizon.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/option_expiries_response"
+              example:
+                ticker: SPX
+                start_date: "2026-07-10"
+                end_date: "2026-10-08"
+                expiries:
+                  - "2026-07-10"
+                  - "2026-07-13"
+                  - "2026-07-15"
+                  - "2026-07-17"
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
   /hist/{ticker}/{package}/{category}/{date}:
     get:
       summary: Download historical data for a specific ticker, package, category, and date
@@ -450,7 +559,7 @@ paths:
       description: |
         Provides real-time, low-latency market data via WebSocket. Send the full initial set of unprefixed websocket group names in the request body. The response returns all hub URLs authorized for the API key, and requested groups are auto-joined on their matching hubs. Clients should connect to the returned hub URLs and should not call client-side joinGroup for this POST flow.
 
-        Group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Standard Quant API keys are limited to 50 groups. Commercial or contracted API keys may have a custom group limit.
+        Group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Explicit-expiry groups use a `YYYYMMDD` category suffix, for example `SOXL_classic_gex_20260717`, `SOXL_state_gamma_20260717`, or `SOXL_orderflow_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates. Standard Quant API keys are limited to 150 groups by default. Commercial or contracted API keys may have a higher custom group limit.
       tags:
         - Quant
       security:
@@ -471,6 +580,7 @@ paths:
                     - SPX_classic_gex_full
                     - SPX_state_gamma_zero
                     - ES_SPX_orderflow_orderflow
+                    - SOXL_state_gamma_20260717
       responses:
         '200':
           description: WebSocket connection URLs for all authorized hubs.
@@ -489,7 +599,7 @@ paths:
       description: |
         Replaces the active group memberships for the current API websocket slot without issuing new WebSocket URLs. The request body is the complete desired set of active subscriptions. Any group omitted from the PATCH payload is removed server-side.
 
-        Each group entry must include the hub the client is connected to and the unprefixed group name. The hub must match the group package/category. The same group limits as POST negotiation apply. Standard Quant API keys are limited to 50 groups. Commercial or contracted API keys may have a custom group limit.
+        Each group entry must include the hub the client is connected to and the unprefixed group name. The hub must match the group package/category, including explicit-expiry groups: expiry classic GEX uses `classic`, expiry state GEX uses `state_gex`, expiry state greeks use `state_greeks`, and expiry orderflow uses `orderflow`. The same group limits as POST negotiation apply. Standard Quant API keys are limited to 150 groups by default. Commercial or contracted API keys may have a higher custom group limit.
       tags:
         - Quant
       security:
@@ -513,6 +623,8 @@ paths:
                       group: SPX_state_gamma_zero
                     - hub: orderflow
                       group: ES_SPX_orderflow_orderflow
+                    - hub: state_greeks
+                      group: SOXL_state_gamma_20260717
       responses:
         '200':
           description: Active websocket group memberships replaced.
@@ -583,6 +695,117 @@ components:
         - $ref: "#/components/schemas/ticker_stock"
         - $ref: "#/components/schemas/ticker_index"
         - $ref: "#/components/schemas/ticker_variant"
+    option_ticker:
+      oneOf:
+        - $ref: "#/components/schemas/ticker_stock"
+        - $ref: "#/components/schemas/ticker_index"
+        - $ref: "#/components/schemas/quant_stock_ticker"
+        - $ref: "#/components/schemas/quant_index_ticker"
+      description: Canonical option-owning ticker, including standard and Quant-only stock/index tickers.
+    quant_stock_ticker:
+      type: string
+      minLength: 1
+      maxLength: 5
+      enum:
+        - SOXL
+        - LLY
+        - FUTU
+        - MARA
+        - PYPL
+        - F
+        - ETHA
+        - EXK
+        - HIMS
+        - PINS
+        - NKE
+        - IREN
+        - RIVN
+        - IEF
+        - MTCH
+        - SBSW
+        - RIOT
+        - ONDS
+        - CRM
+        - PFE
+        - TSLL
+        - TGT
+        - NXE
+        - WMT
+        - BMNR
+        - CIFR
+        - TTD
+        - SMR
+        - XLF
+        - WULF
+        - DRAM
+        - BE
+        - NBIS
+        - OXY
+        - XLE
+        - GDX
+        - SMH
+        - JPM
+        - BAC
+        - WFC
+        - C
+        - GS
+        - MS
+        - SCHW
+        - AXP
+        - V
+        - MA
+        - CME
+        - CBOE
+        - NDAQ
+      description: Additional Quant-only stock ticker available on the realtime WebSocket feed.
+    quant_index_ticker:
+      type: string
+      minLength: 3
+      maxLength: 3
+      enum:
+        - XSP
+      description: Additional Quant-only index ticker available on the realtime WebSocket feed.
+    quant_tickers_response:
+      type: object
+      required:
+        - stocks
+        - indexes
+      properties:
+        stocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/quant_stock_ticker"
+          description: Additional Quant-only stock tickers available for realtime WebSocket output.
+        indexes:
+          type: array
+          items:
+            $ref: "#/components/schemas/quant_index_ticker"
+          description: Additional Quant-only index tickers available for realtime WebSocket output.
+    option_expiries_response:
+      type: object
+      required:
+        - ticker
+        - start_date
+        - end_date
+        - expiries
+      properties:
+        ticker:
+          type: string
+          description: Canonical ticker used for the expiry lookup.
+        start_date:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: Start of the published expiry horizon in YYYY-MM-DD format.
+        end_date:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: End of the published expiry horizon in YYYY-MM-DD format.
+        expiries:
+          type: array
+          items:
+            type: string
+            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: All valid option expiries in YYYY-MM-DD format within the published horizon.
     ticker_variant:
       type: string
       minLength: 4
@@ -1054,6 +1277,24 @@ components:
         - zomma_ex_vol
         - zomma_ex_vol_skew_adj
       description: Research metric identifier for chart data generation.
+    data_category:
+      type: string
+      enum:
+        - gex_full
+        - gex_zero
+        - gex_one
+        - volume_zero
+        - volume_one
+        - delta_zero
+        - delta_one
+        - gamma_zero
+        - gamma_one
+        - vanna_zero
+        - vanna_one
+        - charm_zero
+        - charm_one
+        - orderflow
+      description: Data category name.
     category_orderflow:
       type: string
       enum:
@@ -1068,13 +1309,17 @@ components:
         - classic
         - state_gex
         - state_greeks_zero
+        - state_greeks
         - state_greeks_one
         - orderflow
-      description: Public WebSocket hub name.
+      description: Public WebSocket hub name. Standard state greeks use `state_greeks_zero`/`state_greeks_one`; explicit expiry greeks use `state_greeks`; explicit expiry orderflow uses `orderflow`.
     websocket_group_name:
       type: string
       example: SPX_state_gamma_zero
-      description: Unprefixed websocket group name in `{ticker}_{package}_{category}` format.
+      description: |
+        Unprefixed websocket group name in `{ticker}_{package}_{category}` format. Standard categories include `gex_full`, `gex_zero`, `gex_one`, `delta_zero`, `gamma_zero`, `vanna_zero`, `charm_zero`, `delta_one`, `gamma_one`, `vanna_one`, `charm_one`, and `orderflow`.
+
+        Explicit-expiry groups use a `YYYYMMDD` category suffix discovered from `GET /v2/options/{ticker}/expiries`, for example `SPX_classic_gex_20260717`, `SPX_state_gex_20260717`, `SPX_state_gamma_20260717`, and `SPX_orderflow_20260717`.
     websocket_urls:
       type: object
       description: Map of hub name to signed WebSocket URL. Contains every hub authorized for the API key.
@@ -1090,7 +1335,11 @@ components:
         state_greeks_zero:
           type: string
           format: uri
-          description: Connection URL for the State Greeks 0DTE hub.
+          description: Connection URL for the standard State Greeks 0DTE hub.
+        state_greeks:
+          type: string
+          format: uri
+          description: Connection URL for explicit-expiry State Greeks groups.
         state_greeks_one:
           type: string
           format: uri
@@ -1115,6 +1364,7 @@ components:
           - SPX_classic_gex_full
           - SPX_state_gamma_zero
           - ES_SPX_orderflow_orderflow
+          - SOXL_state_gamma_20260717
     websocket_negotiate_response:
       type: object
       required:
@@ -1127,6 +1377,7 @@ components:
           classic: wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>
           state_gex: wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>
           state_greeks_zero: wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>
+          state_greeks: wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>
           state_greeks_one: wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>
           orderflow: wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>
     websocket_group_update_item:
@@ -1157,6 +1408,8 @@ components:
             group: SPX_state_gamma_zero
           - hub: orderflow
             group: ES_SPX_orderflow_orderflow
+          - hub: state_greeks
+            group: SOXL_state_gamma_20260717
     websocket_group_update_response:
       type: object
       required:
@@ -1179,6 +1432,7 @@ components:
           classic: 1
           state_gex: 0
           state_greeks_zero: 1
+          state_greeks: 1
           state_greeks_one: 0
           orderflow: 1
     websocket_legacy_negotiate_response:
@@ -1197,6 +1451,7 @@ components:
           classic: wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>
           state_gex: wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>
           state_greeks_zero: wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>
+          state_greeks: wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>
           state_greeks_one: wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>
           orderflow: wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>
         prefix: blue
@@ -1328,6 +1583,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/research_ticker"
+    option_ticker_in_path:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/option_ticker"
+      description: Canonical option-owning ticker. Use standard or Quant-only stock/index tickers.
     ticker_in_path:
       name: ticker
       in: path

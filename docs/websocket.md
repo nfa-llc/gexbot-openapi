@@ -22,7 +22,7 @@ POST groups are unprefixed and use:
 {ticker}_{package}_{category}
 ```
 
-Examples:
+Standard examples:
 
 ```text
 SPX_classic_gex_full
@@ -30,17 +30,51 @@ SPX_state_gamma_zero
 ES_SPX_orderflow_orderflow
 ```
 
+Explicit-expiry groups use the same format with a `YYYYMMDD` category suffix:
+
+```text
+SPX_classic_gex_20260717
+SPX_state_gex_20260717
+SPX_state_delta_20260717
+SPX_state_gamma_20260717
+SPX_state_vanna_20260717
+SPX_state_charm_20260717
+SPX_orderflow_20260717
+```
+
+Discover valid expiry dates with:
+
+```http
+GET https://api.gex.bot/v2/options/{ticker}/expiries
+```
+
+The response returns every valid expiration for that ticker within the current-date-through-90-day horizon, including non-Friday expirations where available. Remove the dashes from a returned `YYYY-MM-DD` date to build the WebSocket group suffix. For example, `2026-07-17` becomes `20260717`.
+
+Additional Quant tickers are discoverable with:
+
+```http
+GET https://api.gex.bot/tickers/quant
+```
+
+These supplemental Quant stock and index tickers are WebSocket/PubSub-only. They can publish realtime standard groups and explicit expiry groups, but they are not REST chart/history endpoints. The `indexes` response currently contains `XSP`.
+
 Hub mapping:
 
 | Hub | Group examples |
 |---|---|
-| `classic` | `SPX_classic_gex_full`, `SPX_classic_gex_zero`, `SPX_classic_gex_one` |
-| `state_gex` | `SPX_state_gex_full`, `SPX_state_gex_zero`, `SPX_state_gex_one` |
+| `classic` | `SPX_classic_gex_full`, `SPX_classic_gex_zero`, `SPX_classic_gex_one`, `SPX_classic_gex_20260717` |
+| `state_gex` | `SPX_state_gex_full`, `SPX_state_gex_zero`, `SPX_state_gex_one`, `SPX_state_gex_20260717` |
 | `state_greeks_zero` | `SPX_state_delta_zero`, `SPX_state_gamma_zero`, `SPX_state_vanna_zero`, `SPX_state_charm_zero` |
+| `state_greeks` | `SPX_state_delta_20260717`, `SPX_state_gamma_20260717`, `SPX_state_vanna_20260717`, `SPX_state_charm_20260717` |
 | `state_greeks_one` | `SPX_state_delta_one`, `SPX_state_gamma_one`, `SPX_state_vanna_one`, `SPX_state_charm_one` |
-| `orderflow` | `ES_SPX_orderflow_orderflow`, `SPX_orderflow_orderflow` |
+| `orderflow` | `ES_SPX_orderflow_orderflow`, `SPX_orderflow_orderflow`, `SPX_orderflow_20260717` |
 
-Volume groups are not available on the API WebSocket feed.
+Notes:
+
+- Explicit expiry groups are realtime WebSocket/PubSub-only; they are not persisted to REST history.
+- Explicit expiry groups are published on a lower cadence than standard groups, currently about every 5 seconds.
+- Explicit expiry groups use canonical option-owning tickers such as `SPX`, `NDX`, `SPY`, `QQQ`, Quant-only stock tickers, or the Quant-only `XSP` index.
+- Volume groups are not available on the API WebSocket feed.
 
 ## POST /v2/negotiate
 
@@ -59,7 +93,8 @@ Content-Type: application/json
   "groups": [
     "SPX_classic_gex_full",
     "SPX_state_gamma_zero",
-    "ES_SPX_orderflow_orderflow"
+    "ES_SPX_orderflow_orderflow",
+    "SOXL_state_gamma_20260717"
   ]
 }
 ```
@@ -72,6 +107,7 @@ Content-Type: application/json
     "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
     "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
     "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
+    "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>",
     "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
     "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
   }
@@ -99,7 +135,8 @@ Content-Type: application/json
   "groups": [
     { "hub": "classic", "group": "SPX_classic_gex_full" },
     { "hub": "state_greeks_zero", "group": "SPX_state_gamma_zero" },
-    { "hub": "orderflow", "group": "ES_SPX_orderflow_orderflow" }
+    { "hub": "orderflow", "group": "ES_SPX_orderflow_orderflow" },
+    { "hub": "state_greeks", "group": "SOXL_state_gamma_20260717" }
   ]
 }
 ```
@@ -108,11 +145,12 @@ Content-Type: application/json
 
 ```json
 {
-  "updated_groups": 3,
+  "updated_groups": 4,
   "hubs": {
     "classic": 1,
     "state_gex": 0,
     "state_greeks_zero": 1,
+    "state_greeks": 1,
     "state_greeks_one": 0,
     "orderflow": 1
   }
@@ -123,16 +161,17 @@ The `hub` value must match the group. For example, `SPX_classic_gex_full` must u
 
 ## group limits
 
-- Standard Quant API keys are limited to 50 active groups.
-- Commercial or contracted API keys may have a custom group limit.
+- Standard Quant API keys are limited to 150 active groups by default.
+- Commercial or contracted API keys may have a higher custom group limit.
 - Duplicate groups count once.
+- Each explicit expiry metric is its own group, so multi-ticker/multi-expiry subscriptions can consume the limit quickly.
 - Limits apply independently per API websocket slot.
 
 Over-limit requests return `403 Forbidden`.
 
 ## messages
 
-Messages are [Zstandard](https://facebook.github.io/zstd/)-compressed [Protobufs](https://protobuf.dev/).
+Messages are [Zstandard](https://facebook.github.io/zstd/)-compressed [Protobufs](https://protobuf.dev/). Explicit expiry groups use the same Protobuf message types as their standard package equivalents.
 
 ## connection behavior
 
@@ -166,6 +205,7 @@ Legacy response shape:
     "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
     "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
     "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
+    "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>",
     "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
     "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
   },
@@ -189,7 +229,7 @@ Legacy group names must prepend the returned prefix, e.g. `blue_SPX_orderflow_or
 
 **Cause:** The group was not included in the POST negotiate body or the latest PATCH replacement body, or the client is connected to the wrong hub.
 
-**Fix:** Ensure every desired group is included in the current full group set and that the hub matches the group package/category.
+**Fix:** Ensure every desired group is included in the current full group set and that the hub matches the group package/category. For explicit expiry groups, also confirm the ticker is canonical and the `YYYYMMDD` suffix came from `GET /v2/options/{ticker}/expiries`.
 
 ---
 

@@ -14,7 +14,7 @@
 ## API patterns & conventions
 - Endpoints are split by package prefix: `/{ticker}/classic/{category}`, `/{ticker}/state/{category}`, `/{ticker}/orderflow/{category}`.
 - Sub-endpoints `/majors` and `/maxchange` exist under classic and state paths.
-- Security is `bearer_auth` (HTTP Bearer token). The `/tickers` endpoint is the only unauthenticated endpoint (`security: []`).
+- Security is `bearer_auth` (HTTP Bearer token). The `/tickers` and `/{package}/categories` endpoints are unauthenticated (`security: []`).
 - Each product requires a dedicated API key: a **gexbot** key for gexbot endpoints, and a **gexbot research** (`gbR`) key for `/research` endpoints. Keys are product-specific and not interchangeable.
 - `User-Agent` and `Accept` headers are required on all requests (reusable parameters: `user_agent_header`, `accept_header`).
 - Tickers are enumerated across `ticker_stock`, `ticker_index`, and `ticker_variant` schemas.
