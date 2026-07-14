@@ -754,7 +754,6 @@
                 "html",
                 "json",
                 "csv",
-                "plotly",
                 "webp"
               ]
             }
@@ -783,19 +782,6 @@
                 "histogram",
                 "scatter",
                 "bar"
-              ]
-            }
-          },
-          {
-            "name": "chart_type",
-            "in": "query",
-            "required": false,
-            "description": "Rendering engine used to generate the chart.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "matplotlib",
-                "plotly"
               ]
             }
           },

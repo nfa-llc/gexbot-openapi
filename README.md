@@ -187,28 +187,28 @@ User-Agent: my-app/1.0
 Accept: application/json
 ```
 
-> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key with `research_` prefix. This is separate from
+> **Note:** The `/research` endpoints require a dedicated **gexbot research** (`gbR`) API key with `research_` prefix.
+> This is separate from
 > your gexbot API key and is not interchangeable.
 
 **Query parameters (all optional)**
 
-| Parameter           | Type    | Description                                                                         |
-|---------------------|---------|-------------------------------------------------------------------------------------|
-| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `html`, `json`, `csv`, `plotly`, `webp` |
-| `view`              | string  | Chart view: `skew`, `term`, `surface`                                               |
-| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                                   |
-| `chart_type`        | string  | Rendering engine: `matplotlib`, `plotly`                                            |
-| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                                      |
-| `strikes`           | number  | Number of strikes to include                                                        |
-| `start_dte`         | number  | Start DTE filter                                                                    |
-| `end_dte`           | number  | End DTE filter                                                                      |
-| `expiration_filter` | string  | Expiration date filter                                                              |
-| `contract_agg`      | boolean | Aggregate by contract                                                               |
-| `expiry_agg`        | boolean | Aggregate by expiry                                                                 |
-| `skew_adj`          | boolean | Apply skew adjustment                                                               |
-| `limit_y`           | boolean | Limit y-axis range                                                                  |
-| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                            |
-| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                                     |
+| Parameter           | Type    | Description                                                               |
+|---------------------|---------|---------------------------------------------------------------------------|
+| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `html`, `json`, `csv`, `webp` |
+| `view`              | string  | Chart view: `skew`, `term`, `surface`                                     |
+| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                         |
+| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                            |
+| `strikes`           | number  | Number of strikes to include                                              |
+| `start_dte`         | number  | Start DTE filter                                                          |
+| `end_dte`           | number  | End DTE filter                                                            |
+| `expiration_filter` | string  | Expiration date filter                                                    |
+| `contract_agg`      | boolean | Aggregate by contract                                                     |
+| `expiry_agg`        | boolean | Aggregate by expiry                                                       |
+| `skew_adj`          | boolean | Apply skew adjustment                                                     |
+| `limit_y`           | boolean | Limit y-axis range                                                        |
+| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                  |
+| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                           |
 
 ### subscription tiers
 

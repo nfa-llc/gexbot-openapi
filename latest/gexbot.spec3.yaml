@@ -444,7 +444,6 @@ paths:
               - html
               - json
               - csv
-              - plotly
               - webp
         - name: view
           in: query
@@ -465,15 +464,6 @@ paths:
               - histogram
               - scatter
               - bar
-        - name: chart_type
-          in: query
-          required: false
-          description: Rendering engine used to generate the chart.
-          schema:
-            type: string
-            enum:
-              - matplotlib
-              - plotly
         - name: theme
           in: query
           required: false
