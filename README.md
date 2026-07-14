@@ -33,7 +33,8 @@ https://api.gex.bot/v2
 
 ### authentication
 
-All endpoints except `/tickers` and `/{package}/categories` require a valid API key passed as a Bearer token in the `Authorization` header.
+All endpoints except `/tickers` and `/{package}/categories` require a valid API key passed as a Bearer token in the
+`Authorization` header.
 Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`)
 key for the `/research` endpoints. Keys are not interchangeable between products.
 
@@ -193,22 +194,22 @@ Accept: application/json
 
 **Query parameters (all optional)**
 
-| Parameter           | Type    | Description                                                               |
-|---------------------|---------|---------------------------------------------------------------------------|
-| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `html`, `json`, `csv`, `webp` |
-| `view`              | string  | Chart view: `skew`, `term`, `surface`                                     |
-| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                         |
-| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                            |
-| `strikes`           | number  | Number of strikes to include                                              |
-| `start_dte`         | number  | Start DTE filter                                                          |
-| `end_dte`           | number  | End DTE filter                                                            |
-| `expiration_filter` | string  | Expiration date filter                                                    |
-| `contract_agg`      | boolean | Aggregate by contract                                                     |
-| `expiry_agg`        | boolean | Aggregate by expiry                                                       |
-| `skew_adj`          | boolean | Apply skew adjustment                                                     |
-| `limit_y`           | boolean | Limit y-axis range                                                        |
-| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                  |
-| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                           |
+| Parameter           | Type    | Description                                                       |
+|---------------------|---------|-------------------------------------------------------------------|
+| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `json`, `csv`, `webp` |
+| `view`              | string  | Chart view: `skew`, `term`, `surface`                             |
+| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                 |
+| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                    |
+| `strikes`           | number  | Number of strikes to include                                      |
+| `start_dte`         | number  | Start DTE filter                                                  |
+| `end_dte`           | number  | End DTE filter                                                    |
+| `expiration_filter` | string  | Expiration date filter                                            |
+| `contract_agg`      | boolean | Aggregate by contract                                             |
+| `expiry_agg`        | boolean | Aggregate by expiry                                               |
+| `skew_adj`          | boolean | Apply skew adjustment                                             |
+| `limit_y`           | boolean | Limit y-axis range                                                |
+| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                          |
+| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                   |
 
 ### subscription tiers
 
@@ -227,7 +228,8 @@ Quant API users should use `POST /negotiate` to receive authorized hub URLs and 
 
 Realtime WebSocket groups include the standard full/zero/one groups plus explicit-expiry groups such as
 `SPX_state_gamma_20260717`. Explicit-expiry State Greeks groups use the `state_greeks` hub, while standard
-0DTE/1DTE State Greeks remain on `state_greeks_zero`/`state_greeks_one`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates and
+0DTE/1DTE State Greeks remain on `state_greeks_zero`/`state_greeks_one`. Use `GET /v2/options/{ticker}/expiries` to
+discover valid expiry dates and
 `GET https://api.gex.bot/tickers/quant` to discover additional Quant tickers.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.

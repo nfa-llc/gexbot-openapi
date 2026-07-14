@@ -441,7 +441,6 @@ paths:
               - jpeg
               - svg
               - pdf
-              - html
               - json
               - csv
               - webp
