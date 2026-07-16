@@ -130,7 +130,7 @@
             "$ref": "#/components/parameters/ticker_in_path"
           },
           {
-            "$ref": "#/components/schemas/category_orderflow"
+            "$ref": "#/components/parameters/orderflow_category_in_path"
           },
           {
             "$ref": "#/components/parameters/user_agent_header"
@@ -713,7 +713,7 @@
     "/research/{ticker}/{metric}": {
       "get": {
         "summary": "Get research chart data for a ticker and metric",
-        "description": "Returns research chart data for the specified ticker and metric. Supports various output formats, chart types, and filtering options.",
+        "description": "Returns research chart data for the specified ticker and metric. Supports various output formats, chart views, and filtering options.\n\nNot every query parameter applies to every request. Requests are routed first by `metric`, then by `view`:\na small set of dedicated metrics (listed in `x-dedicated_metrics` below) always render a fixed chart and\nignore `view` and all view-scoped parameters, while every other metric renders the `skew` (default),\n`term`, or `surface` view. View-scoped query parameters are annotated with `x-applicable_views`\n(omitted means the parameter applies to all views), and parameters that only affect rendered charts —\nignored when `format` is `json` or `csv` — are annotated with `x-chart_only`.\n\nInapplicable or invalid optional query parameters are silently ignored and server defaults are applied;\nthey do not cause a `400` response. See `docs/research-parameter-applicability.md` for the full\napplicability matrix and extension semantics.\n",
         "security": [
           {
             "bearer_auth": []
@@ -722,6 +722,51 @@
         "tags": [
           "Research"
         ],
+        "x-dedicated_metrics": {
+          "description": "Requests for these metric values always render a fixed, dedicated chart. The `view` parameter and all view-scoped query parameters are ignored; only the listed query parameters take effect.",
+          "metrics": {
+            "max_pain": {
+              "supported_parameters": [
+                "format",
+                "theme",
+                "start_dte",
+                "end_dte",
+                "expiration_filter"
+              ]
+            },
+            "parity": {
+              "supported_parameters": [
+                "format",
+                "theme",
+                "start_dte",
+                "end_dte",
+                "expiration_filter",
+                "contract_filter",
+                "moneyness_filter"
+              ]
+            },
+            "put_call_parity": {
+              "supported_parameters": [
+                "format",
+                "theme",
+                "start_dte",
+                "end_dte",
+                "expiration_filter",
+                "contract_filter",
+                "moneyness_filter"
+              ]
+            },
+            "gamma_flip": {
+              "supported_parameters": [
+                "format",
+                "theme",
+                "start_dte",
+                "end_dte",
+                "expiration_filter"
+              ]
+            }
+          }
+        },
         "parameters": [
           {
             "$ref": "#/components/parameters/research_ticker_in_path"
@@ -744,8 +789,10 @@
             "name": "format",
             "in": "query",
             "required": false,
+            "description": "Output format. Chart formats return a rendered chart; `json` and `csv` return structured data and ignore chart-only parameters (see `x-chart_only`). Defaults to `svg`.",
             "schema": {
               "type": "string",
+              "default": "svg",
               "enum": [
                 "png",
                 "jpeg",
@@ -761,8 +808,10 @@
             "name": "view",
             "in": "query",
             "required": false,
+            "description": "Chart view. Defaults to `skew`. Ignored for dedicated metrics (see `x-dedicated_metrics`).",
             "schema": {
               "type": "string",
+              "default": "skew",
               "enum": [
                 "skew",
                 "term",
@@ -774,6 +823,12 @@
             "name": "type",
             "in": "query",
             "required": false,
+            "description": "Chart draw type. Applies to the skew and term views; the default depends on the metric.",
+            "x-applicable_views": [
+              "skew",
+              "term"
+            ],
+            "x-chart_only": true,
             "schema": {
               "type": "string",
               "enum": [
@@ -789,6 +844,7 @@
             "in": "query",
             "required": false,
             "description": "Chart color theme. Defaults to dark.",
+            "x-chart_only": true,
             "schema": {
               "type": "string",
               "default": "dark",
@@ -802,14 +858,21 @@
             "name": "strikes",
             "in": "query",
             "required": false,
+            "description": "Maximum number of strikes to include. Applies to the skew view only. Values are clamped to the range 5-250.",
+            "x-applicable_views": [
+              "skew"
+            ],
             "schema": {
-              "type": "number"
+              "type": "number",
+              "minimum": 5,
+              "maximum": 250
             }
           },
           {
             "name": "start_dte",
             "in": "query",
             "required": false,
+            "description": "Start of the days-to-expiration window.",
             "schema": {
               "type": "number"
             }
@@ -818,6 +881,7 @@
             "name": "end_dte",
             "in": "query",
             "required": false,
+            "description": "End of the days-to-expiration window.",
             "schema": {
               "type": "number"
             }
@@ -826,6 +890,7 @@
             "name": "expiration_filter",
             "in": "query",
             "required": false,
+            "description": "Expiration date filter: `m` (monthly), `w` (weekly), or `q` (quarterly).",
             "schema": {
               "type": "string"
             }
@@ -834,40 +899,83 @@
             "name": "contract_agg",
             "in": "query",
             "required": false,
+            "description": "Aggregate calls and puts together. Applies to the skew and term views. Defaults to true.",
+            "x-applicable_views": [
+              "skew",
+              "term"
+            ],
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             }
           },
           {
             "name": "expiry_agg",
             "in": "query",
             "required": false,
+            "description": "Aggregate across expirations. Applies to the skew view only. Defaults to false.",
+            "x-applicable_views": [
+              "skew"
+            ],
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "name": "skew_adj",
             "in": "query",
             "required": false,
+            "description": "Apply skew adjustment to the rendered chart. Applies to the skew view only. Defaults to false.",
+            "x-applicable_views": [
+              "skew"
+            ],
+            "x-chart_only": true,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
             "name": "limit_y",
             "in": "query",
             "required": false,
+            "description": "Limit the y-axis range of the rendered chart. Applies to the term view only. Defaults to true.",
+            "x-applicable_views": [
+              "term"
+            ],
+            "x-chart_only": true,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "series",
+            "in": "query",
+            "required": false,
+            "description": "Group term-structure results into separate series lines. Applies to the term view only; omit for a single aggregated series.",
+            "x-applicable_views": [
+              "term"
+            ],
+            "x-chart_only": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "moneyness",
+                "strikes",
+                "deltas"
+              ]
             }
           },
           {
             "name": "contract_filter",
             "in": "query",
             "required": false,
+            "description": "Filter by contract type. Applies to all views. Defaults to `all`.",
             "schema": {
               "type": "string",
+              "default": "all",
               "enum": [
                 "calls",
                 "puts",
@@ -879,6 +987,7 @@
             "name": "moneyness_filter",
             "in": "query",
             "required": false,
+            "description": "Filter by moneyness. Applies to all views; omit for no moneyness filtering (implied-volatility metrics default to `ntm`).",
             "schema": {
               "type": "string",
               "enum": [
@@ -1013,7 +1122,7 @@
                         "group": "ES_SPX_orderflow_orderflow"
                       },
                       {
-                        "hub": "state_greeks_zero",
+                        "hub": "state_greeks",
                         "group": "SOXL_state_gamma_20260717"
                       }
                     ]
@@ -2320,6 +2429,14 @@
               "$ref": "#/components/schemas/category_state"
             }
           ]
+        }
+      },
+      "orderflow_category_in_path": {
+        "name": "category",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/category_orderflow"
         }
       },
       "package_in_path": {

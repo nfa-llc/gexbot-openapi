@@ -208,8 +208,14 @@ Accept: application/json
 | `expiry_agg`        | boolean | Aggregate by expiry                                               |
 | `skew_adj`          | boolean | Apply skew adjustment                                             |
 | `limit_y`           | boolean | Limit y-axis range                                                |
+| `series`            | string  | Term-view series grouping: `moneyness`, `strikes`, `deltas`       |
 | `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                          |
 | `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                   |
+
+Not every parameter applies to every request — applicability depends on the selected `metric` and `view`, and
+inapplicable parameters are silently ignored. See
+[docs/research-parameter-applicability.md](docs/research-parameter-applicability.md) for the full applicability
+matrix and the `x-applicable_views` / `x-chart_only` / `x-dedicated_metrics` spec extensions.
 
 ### subscription tiers
 
