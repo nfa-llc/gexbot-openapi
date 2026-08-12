@@ -2,21 +2,27 @@
 
 > **Requires Quant Subscription**
 >
-> ⚠️ Data is only published during New York Stock Exchange cash hours (9:30 AM–4:00 PM ET).
+> Data publishes during New York Stock Exchange cash hours from 9:30 AM through 4:00 PM Eastern Time.
 
-Provides real-time, low-latency market data via Azure Web PubSub.
+The feed uses Azure Web PubSub.
+The second-generation feed is called V2.
+V2 sends analytics and spot as separate messages.
 
 ## recommended flow
 
-1. Build the complete initial set of unprefixed groups you want.
-2. `POST /v2/negotiate` with `{"groups": [...]}`.
-3. Connect to the returned hub URLs. The response includes every hub URL authorized for your API key.
-4. Listen for group messages. Requested groups are auto-joined by the server; do **not** call `joinGroup` for this POST flow.
-5. To change groups without reconnecting, `PATCH /v2/negotiate` with the complete desired `{ hub, group }` set.
+1. Build the complete initial analytics group set.
+2. Add one matching `{ticker}_spot` group for each analytics ticker.
+3. Send the unprefixed groups to `POST /v2/negotiate`.
+4. Connect to the returned `v2_*` hub URLs.
+5. Listen for analytics and `proto.spot` messages on the same connections.
+6. Use `PATCH /v2/negotiate` to replace the complete membership set without reconnecting.
+
+The server joins the initial groups from the POST request.
+Do not send `joinGroup` messages for this flow.
 
 ## group format
 
-POST groups are unprefixed and use:
+Analytics groups use this unprefixed format:
 
 ```text
 {ticker}_{package}_{category}
@@ -30,53 +36,79 @@ SPX_state_gamma_zero
 ES_SPX_orderflow_orderflow
 ```
 
-Explicit-expiry groups use the same format with a `YYYYMMDD` category suffix:
+Spot groups use this unprefixed format:
 
 ```text
-SPX_classic_gex_20260717
-SPX_state_gex_20260717
-SPX_state_delta_20260717
-SPX_state_gamma_20260717
-SPX_state_vanna_20260717
-SPX_state_charm_20260717
-SPX_orderflow_20260717
+{ticker}_spot
 ```
 
-Discover valid expiry dates with:
+Examples:
+
+```text
+SPX_spot
+ES_SPX_spot
+```
+
+Do not add the Web PubSub color prefix to a POST or PATCH request.
+The server adds the configured prefix.
+
+## V2 hub mapping
+
+| V2 hub | Analytics group examples |
+|---|---|
+| `v2_classic` | `SPX_classic_gex_full`, `SPX_classic_gex_zero`, `SPX_classic_gex_one`, `SPX_classic_gex_20260717` |
+| `v2_state_gex` | `SPX_state_gex_full`, `SPX_state_gex_zero`, `SPX_state_gex_one`, `SPX_state_gex_20260717` |
+| `v2_state_greeks_zero` | `SPX_state_delta_zero`, `SPX_state_gamma_zero`, `SPX_state_vanna_zero`, `SPX_state_charm_zero` |
+| `v2_state_greeks` | `SPX_state_delta_20260717`, `SPX_state_gamma_20260717`, `SPX_state_vanna_20260717`, `SPX_state_charm_20260717` |
+| `v2_state_greeks_one` | `SPX_state_delta_one`, `SPX_state_gamma_one`, `SPX_state_vanna_one`, `SPX_state_charm_one` |
+| `v2_orderflow` | `ES_SPX_orderflow_orderflow`, `SPX_orderflow_orderflow`, `SPX_orderflow_20260717` |
+
+Each `{ticker}_spot` group uses every V2 hub that has analytics for that ticker.
+There is no dedicated spot hub URL.
+There is no second spot connection.
+
+## explicit expirations
+
+Discover valid expiration dates with:
 
 ```http
 GET https://api.gex.bot/v2/options/{ticker}/expiries
 ```
 
-The response returns every valid expiration for that ticker within the current-date-through-90-day horizon, including non-Friday expirations where available. Remove the dashes from a returned `YYYY-MM-DD` date to build the WebSocket group suffix. For example, `2026-07-17` becomes `20260717`.
+Remove the dashes from a returned `YYYY-MM-DD` date.
+For example, convert `2026-07-17` to `20260717`.
 
-Additional Quant tickers are discoverable with:
+Explicit-expiration groups use these formats:
+
+```text
+{ticker}_classic_gex_YYYYMMDD
+{ticker}_state_gex_YYYYMMDD
+{ticker}_state_delta_YYYYMMDD
+{ticker}_state_gamma_YYYYMMDD
+{ticker}_state_vanna_YYYYMMDD
+{ticker}_state_charm_YYYYMMDD
+{ticker}_orderflow_YYYYMMDD
+```
+
+Explicit-expiration groups are real-time only.
+They are not stored in REST history.
+They publish at a lower cadence than standard groups.
+
+Additional Quant tickers are available from:
 
 ```http
 GET https://api.gex.bot/tickers/quant
 ```
 
-These supplemental Quant stock and index tickers are WebSocket/PubSub-only. They can publish realtime standard groups and explicit expiry groups, but they are not REST chart/history endpoints. The `indexes` response currently contains `XSP`.
-
-Hub mapping:
-
-| Hub | Group examples |
-|---|---|
-| `classic` | `SPX_classic_gex_full`, `SPX_classic_gex_zero`, `SPX_classic_gex_one`, `SPX_classic_gex_20260717` |
-| `state_gex` | `SPX_state_gex_full`, `SPX_state_gex_zero`, `SPX_state_gex_one`, `SPX_state_gex_20260717` |
-| `state_greeks_zero` | `SPX_state_delta_zero`, `SPX_state_gamma_zero`, `SPX_state_vanna_zero`, `SPX_state_charm_zero` |
-| `state_greeks` | `SPX_state_delta_20260717`, `SPX_state_gamma_20260717`, `SPX_state_vanna_20260717`, `SPX_state_charm_20260717` |
-| `state_greeks_one` | `SPX_state_delta_one`, `SPX_state_gamma_one`, `SPX_state_vanna_one`, `SPX_state_charm_one` |
-| `orderflow` | `ES_SPX_orderflow_orderflow`, `SPX_orderflow_orderflow`, `SPX_orderflow_20260717` |
-
-Notes:
-
-- Explicit expiry groups are realtime WebSocket/PubSub-only; they are not persisted to REST history.
-- Explicit expiry groups are published on a lower cadence than standard groups, currently about every 5 seconds.
-- Explicit expiry groups use canonical option-owning tickers such as `SPX`, `NDX`, `SPY`, `QQQ`, Quant-only stock tickers, or the Quant-only `XSP` index.
-- Volume groups are not available on the API WebSocket feed.
+These additional tickers are WebSocket-only.
+They are not REST chart or history tickers.
 
 ## POST /v2/negotiate
+
+List each spot group once in the POST body.
+The server expands that group onto each applicable V2 hub.
+A POST request with no spot groups remains on the current-generation hubs for compatibility.
+Do not use the current-generation flow for a new custom Quant integration.
 
 ### request
 
@@ -93,10 +125,19 @@ Content-Type: application/json
   "groups": [
     "SPX_classic_gex_full",
     "SPX_state_gamma_zero",
+    "SPX_spot",
     "ES_SPX_orderflow_orderflow",
-    "SOXL_state_gamma_20260717"
+    "ES_SPX_spot"
   ]
 }
+```
+
+This request creates these memberships:
+
+```text
+v2_classic: SPX_classic_gex_full, SPX_spot
+v2_state_greeks_zero: SPX_state_gamma_zero, SPX_spot
+v2_orderflow: ES_SPX_orderflow_orderflow, ES_SPX_spot
 ```
 
 ### response
@@ -104,21 +145,58 @@ Content-Type: application/json
 ```json
 {
   "websocket_urls": {
-    "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
-    "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
-    "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
-    "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>",
-    "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
-    "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
+    "v2_classic": "wss://ws.gex.bot:443/client/hubs/v2_classic?access_token=<access_token>",
+    "v2_state_gex": "wss://ws.gex.bot:443/client/hubs/v2_state_gex?access_token=<access_token>",
+    "v2_state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks_zero?access_token=<access_token>",
+    "v2_state_greeks": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks?access_token=<access_token>",
+    "v2_state_greeks_one": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks_one?access_token=<access_token>",
+    "v2_orderflow": "wss://ws.gex.bot:443/client/hubs/v2_orderflow?access_token=<access_token>"
   }
 }
 ```
 
-The response includes all hubs authorized for your API key. Initial groups from the POST body are auto-joined only on their matching hubs.
+The response can include every V2 hub that the API key can use.
+Connect to each hub that your application uses.
+Connect before the access token expires.
+
+## spot messages
+
+Spot arrives in a `google.protobuf.Any` envelope.
+The type URL is:
+
+```text
+proto.spot
+```
+
+The Zstandard-compressed value contains a `spot_price.SpotPrice` Protocol Buffer message:
+
+```proto
+syntax = "proto3";
+
+package spot_price;
+
+message SpotPrice {
+  int64 timestamp = 1;
+  string ticker = 2;
+  uint32 spot = 3;
+  optional int64 source_timestamp_ms = 4;
+}
+```
+
+The wire `spot` value is multiplied by 100.
+Divide it by 100 to get the decimal price.
+
+Analytics and spot for one calculation use the same ticker and timestamp.
+Do not assume which message arrives first.
+Cache either message briefly if your application must combine them.
 
 ## PATCH /v2/negotiate
 
-Use PATCH to replace active group subscriptions without reconnecting. This is a **full replacement** request: any currently-active group not present in the payload is removed server-side.
+PATCH replaces all active memberships for the current API WebSocket slot.
+Any omitted membership is removed.
+
+Each item must contain a V2 hub and an unprefixed group.
+Repeat the spot membership on each V2 hub that has analytics for that ticker.
 
 ### request
 
@@ -133,10 +211,12 @@ Content-Type: application/json
 ```json
 {
   "groups": [
-    { "hub": "classic", "group": "SPX_classic_gex_full" },
-    { "hub": "state_greeks_zero", "group": "SPX_state_gamma_zero" },
-    { "hub": "orderflow", "group": "ES_SPX_orderflow_orderflow" },
-    { "hub": "state_greeks", "group": "SOXL_state_gamma_20260717" }
+    { "hub": "v2_classic", "group": "SPX_classic_gex_full" },
+    { "hub": "v2_classic", "group": "SPX_spot" },
+    { "hub": "v2_state_greeks_zero", "group": "SPX_state_gamma_zero" },
+    { "hub": "v2_state_greeks_zero", "group": "SPX_spot" },
+    { "hub": "v2_orderflow", "group": "ES_SPX_orderflow_orderflow" },
+    { "hub": "v2_orderflow", "group": "ES_SPX_spot" }
   ]
 }
 ```
@@ -145,59 +225,50 @@ Content-Type: application/json
 
 ```json
 {
-  "updated_groups": 4,
+  "updated_groups": 6,
   "hubs": {
-    "classic": 1,
-    "state_gex": 0,
-    "state_greeks_zero": 1,
-    "state_greeks": 1,
-    "state_greeks_one": 0,
-    "orderflow": 1
+    "v2_classic": 2,
+    "v2_state_gex": 0,
+    "v2_state_greeks_zero": 2,
+    "v2_state_greeks": 0,
+    "v2_state_greeks_one": 0,
+    "v2_orderflow": 2
   }
 }
 ```
 
-The `hub` value must match the group. For example, `SPX_classic_gex_full` must use hub `classic`.
+The client must have a live connection on each hub in the PATCH request.
+Use POST and connect before you add groups to a new hub.
 
 ## group limits
 
-- Standard Quant API keys are limited to 150 active groups by default.
-- Commercial or contracted API keys may have a higher custom group limit.
-- Duplicate groups count once.
-- Each explicit expiry metric is its own group, so multi-ticker/multi-expiry subscriptions can consume the limit quickly.
-- Limits apply independently per API websocket slot.
+- Standard Quant API keys allow 150 active hub-and-group memberships by default.
+- A contract can define a different limit.
+- Duplicate memberships count once.
+- Server-expanded spot memberships count toward the limit.
+- One spot group can consume more than one membership when its ticker uses more than one V2 hub.
+- Each explicit-expiration metric is a separate membership.
 
-Over-limit requests return `403 Forbidden`.
-
-## messages
-
-Messages are [Zstandard](https://facebook.github.io/zstd/)-compressed [Protobufs](https://protobuf.dev/). Explicit expiry groups use the same Protobuf message types as their standard package equivalents.
+An over-limit request returns `403 Forbidden`.
 
 ## connection behavior
 
-- A successful POST negotiate closes existing API websocket connections for the same API websocket slot before issuing new URLs.
-- PATCH replaces group memberships without reconnecting and does not issue new URLs.
-- WebSocket URLs must be used before their connection token expires. If a connection is dropped after token expiration, negotiate again.
-- Connect to the hub URLs returned by a single POST response. Connecting to additional hubs from that same response does not require another negotiate call.
+- A successful POST closes the existing API WebSocket session for the same API slot.
+- POST issues new signed URLs and joins the initial memberships.
+- PATCH changes memberships without issuing new URLs.
+- A dropped connection can require a new POST after its token expires.
+- Binary messages are Zstandard-compressed Protocol Buffer messages.
 
-## diagnosing with wscat
+## legacy GET compatibility
 
-[wscat](https://github.com/websockets/wscat) can verify that a negotiated URL connects. For the POST flow, groups are server-joined; do not send `joinGroup`.
+`GET /v2/negotiate` returns current-generation hub URLs and a group prefix.
+Clients manually send `joinGroup` messages after they connect.
 
-```sh
-wscat -c "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>" \
-      --subprotocol json.webpubsub.azure.v1
-```
+Custom Quant use of GET is deprecated.
+Custom Quant clients should migrate to POST and PATCH.
+Official Orderflow integrations continue to use the GET compatibility flow.
 
-Binary messages are expected because payloads are compressed Protobufs.
-
-## legacy GET /v2/negotiate
-
-`GET /v2/negotiate` is deprecated and exists only for legacy clients. It returns a `prefix` and broad client-side join permissions so older clients can send Azure Web PubSub `joinGroup` messages.
-
-New clients should use POST/PATCH. Do not build new integrations around legacy GET.
-
-Legacy response shape:
+Legacy response example:
 
 ```json
 {
@@ -213,28 +284,33 @@ Legacy response shape:
 }
 ```
 
-Legacy group names must prepend the returned prefix, e.g. `blue_SPX_orderflow_orderflow`.
+A legacy group name includes the returned prefix.
+For example, use `blue_SPX_orderflow_orderflow`.
+
+Do not create a new custom Quant integration with legacy GET.
 
 ## common problems
 
-### over-limit errors
+### the POST request returns a spot coverage error
 
-**Cause:** The POST or PATCH request contains more groups than allowed for the API key.
+**Cause:** An analytics ticker has no matching `{ticker}_spot` group, or a spot ticker has no analytics group.
 
-**Fix:** Send fewer groups, or contact us if your commercial or contracted plan requires a custom group limit.
+**Fix:** Include one matching spot group for every analytics ticker in the POST body.
 
----
+### the PATCH request returns a spot coverage error
 
-### no messages after connecting
+**Cause:** A V2 analytics hub has no matching spot membership for the same ticker.
 
-**Cause:** The group was not included in the POST negotiate body or the latest PATCH replacement body, or the client is connected to the wrong hub.
+**Fix:** Add the `{ticker}_spot` membership to every V2 hub that has analytics for that ticker.
 
-**Fix:** Ensure every desired group is included in the current full group set and that the hub matches the group package/category. For explicit expiry groups, also confirm the ticker is canonical and the `YYYYMMDD` suffix came from `GET /v2/options/{ticker}/expiries`.
+### no messages arrive after connection
 
----
+**Cause:** The group is not in the current POST or PATCH membership set, or the client connected to the wrong hub.
+
+**Fix:** Check the complete membership set and the V2 hub mapping.
 
 ### subscriptions disappear after PATCH
 
-**Cause:** PATCH is a full replacement. Omitted groups are removed.
+**Cause:** PATCH is a full replacement request.
 
-**Fix:** Send every group you want to remain subscribed to in every PATCH request.
+**Fix:** Include every membership that must remain active in every PATCH request.

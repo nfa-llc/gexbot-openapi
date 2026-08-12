@@ -130,7 +130,7 @@
             "$ref": "#/components/parameters/ticker_in_path"
           },
           {
-            "$ref": "#/components/schemas/category_orderflow"
+            "$ref": "#/components/parameters/orderflow_category_in_path"
           },
           {
             "$ref": "#/components/parameters/user_agent_header"
@@ -909,7 +909,7 @@
     "/negotiate": {
       "post": {
         "summary": "Negotiate WebSocket connection URLs and initial groups",
-        "description": "Provides real-time, low-latency market data via WebSocket. Send the full initial set of unprefixed websocket group names in the request body. The response returns all hub URLs authorized for the API key, and requested groups are auto-joined on their matching hubs. Clients should connect to the returned hub URLs and should not call client-side joinGroup for this POST flow.\n\nGroup names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Explicit-expiry groups use a `YYYYMMDD` category suffix, for example `SOXL_classic_gex_20260717`, `SOXL_state_gamma_20260717`, or `SOXL_orderflow_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates. Standard Quant API keys are limited to 150 groups by default. Commercial or contracted API keys may have a higher custom group limit.\n",
+        "description": "Provides real-time, low-latency market data via WebSocket. Send the complete initial set of unprefixed analytics groups and one matching `{ticker}_spot` group for each analytics ticker. The presence of the complete spot-group set selects the V2 hubs. The response returns the authorized `v2_*` hub URLs, and the server auto-joins the requested analytics and spot memberships. Connect to the returned V2 URLs. Do not send client-side `joinGroup` messages for this POST flow.\n\nAnalytics group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Explicit-expiry groups use a `YYYYMMDD` category suffix, for example `SOXL_classic_gex_20260717`, `SOXL_state_gamma_20260717`, or `SOXL_orderflow_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates.\n\nList each `{ticker}_spot` group once in the POST body. The server places it on every V2 hub that has analytics for that ticker. Analytics and spot are separate groups on the same V2 connections. Spot messages use the `proto.spot` type URL. Correlate analytics and spot by ticker and timestamp without assuming an arrival order.\n\nA POST request with no spot groups remains on the current-generation analytics hubs for compatibility. New custom Quant integrations should use the complete V2 analytics-and-spot flow.\n\nStandard Quant API keys are limited to 150 active hub-and-group memberships by default. Server-expanded spot memberships count toward this limit. Commercial or contracted API keys may have a higher custom group limit.\n",
         "tags": [
           "Quant"
         ],
@@ -939,8 +939,9 @@
                     "groups": [
                       "SPX_classic_gex_full",
                       "SPX_state_gamma_zero",
+                      "SPX_spot",
                       "ES_SPX_orderflow_orderflow",
-                      "SOXL_state_gamma_20260717"
+                      "ES_SPX_spot"
                     ]
                   }
                 }
@@ -950,7 +951,7 @@
         },
         "responses": {
           "200": {
-            "description": "WebSocket connection URLs for all authorized hubs.",
+            "description": "Authorized V2 hub URLs for the documented analytics-and-spot flow, or current-generation hub URLs for a compatibility request with no spot groups.",
             "content": {
               "application/json": {
                 "schema": {
@@ -972,7 +973,7 @@
       },
       "patch": {
         "summary": "Replace active WebSocket group subscriptions without reconnecting",
-        "description": "Replaces the active group memberships for the current API websocket slot without issuing new WebSocket URLs. The request body is the complete desired set of active subscriptions. Any group omitted from the PATCH payload is removed server-side.\n\nEach group entry must include the hub the client is connected to and the unprefixed group name. The hub must match the group package/category, including explicit-expiry groups: expiry classic GEX uses `classic`, expiry state GEX uses `state_gex`, expiry state greeks use `state_greeks`, and expiry orderflow uses `orderflow`. The same group limits as POST negotiation apply. Standard Quant API keys are limited to 150 groups by default. Commercial or contracted API keys may have a higher custom group limit.\n",
+        "description": "Replaces the active group memberships for the current API websocket slot without issuing new WebSocket URLs. The request body is the complete desired set of active subscriptions. Any group omitted from the PATCH payload is removed server-side.\n\nEach group entry must include the V2 hub that the client is connected to and the unprefixed group name. The hub must match the analytics group package and category. Repeat each `{ticker}_spot` membership on every V2 hub that has analytics for that ticker. For example, an SPX Classic group uses `v2_classic`, an SPX standard 0DTE State gamma group uses `v2_state_greeks_zero`, and `SPX_spot` must appear on both hubs when both analytics groups remain active.\n\nThe same group limit as POST negotiation applies to the complete PATCH membership set. Standard Quant API keys are limited to 150 active hub-and-group memberships by default. Commercial or contracted API keys may have a higher custom group limit.\n",
         "tags": [
           "Quant"
         ],
@@ -1001,20 +1002,28 @@
                   "value": {
                     "groups": [
                       {
-                        "hub": "classic",
+                        "hub": "v2_classic",
                         "group": "SPX_classic_gex_full"
                       },
                       {
-                        "hub": "state_greeks_zero",
+                        "hub": "v2_classic",
+                        "group": "SPX_spot"
+                      },
+                      {
+                        "hub": "v2_state_greeks_zero",
                         "group": "SPX_state_gamma_zero"
                       },
                       {
-                        "hub": "orderflow",
+                        "hub": "v2_state_greeks_zero",
+                        "group": "SPX_spot"
+                      },
+                      {
+                        "hub": "v2_orderflow",
                         "group": "ES_SPX_orderflow_orderflow"
                       },
                       {
-                        "hub": "state_greeks_zero",
-                        "group": "SOXL_state_gamma_20260717"
+                        "hub": "v2_orderflow",
+                        "group": "ES_SPX_spot"
                       }
                     ]
                   }
@@ -1048,7 +1057,7 @@
       "get": {
         "summary": "Legacy WebSocket negotiation with client-side group joins",
         "deprecated": true,
-        "description": "Deprecated compatibility path. Returns connection URLs and a group prefix for legacy clients that manually send Azure Web PubSub joinGroup messages after connecting. New clients should use POST /negotiate and PATCH /negotiate instead.\n",
+        "description": "Compatibility path for clients that manually send Azure Web PubSub `joinGroup` messages after connecting. Custom Quant use is deprecated and should migrate to the V2 POST and PATCH flow. Official Orderflow integrations continue to use this GET compatibility flow.\n",
         "tags": [
           "Quant"
         ],
@@ -1875,48 +1884,92 @@
           "state_greeks_zero",
           "state_greeks",
           "state_greeks_one",
-          "orderflow"
+          "orderflow",
+          "v2_classic",
+          "v2_state_gex",
+          "v2_state_greeks_zero",
+          "v2_state_greeks",
+          "v2_state_greeks_one",
+          "v2_orderflow"
         ],
-        "description": "Public WebSocket hub name. Standard state greeks use `state_greeks_zero`/`state_greeks_one`; explicit expiry greeks use `state_greeks`; explicit expiry orderflow uses `orderflow`."
+        "description": "WebSocket hub name used in a PATCH group replacement. New custom Quant clients should use the `v2_*` values. Current-generation values remain available for compatibility requests with no spot groups."
       },
       "websocket_group_name": {
         "type": "string",
         "example": "SPX_state_gamma_zero",
-        "description": "Unprefixed websocket group name in `{ticker}_{package}_{category}` format. Standard categories include `gex_full`, `gex_zero`, `gex_one`, `delta_zero`, `gamma_zero`, `vanna_zero`, `charm_zero`, `delta_one`, `gamma_one`, `vanna_one`, `charm_one`, and `orderflow`.\n\nExplicit-expiry groups use a `YYYYMMDD` category suffix discovered from `GET /v2/options/{ticker}/expiries`, for example `SPX_classic_gex_20260717`, `SPX_state_gex_20260717`, `SPX_state_gamma_20260717`, and `SPX_orderflow_20260717`.\n"
+        "description": "Unprefixed analytics group name in `{ticker}_{package}_{category}` format, or an unprefixed spot group name in `{ticker}_spot` format. Standard analytics categories include `gex_full`, `gex_zero`, `gex_one`, `delta_zero`, `gamma_zero`, `vanna_zero`, `charm_zero`, `delta_one`, `gamma_one`, `vanna_one`, `charm_one`, and `orderflow`.\n\nExplicit-expiry analytics groups use a `YYYYMMDD` category suffix discovered from `GET /v2/options/{ticker}/expiries`, for example `SPX_classic_gex_20260717`, `SPX_state_gex_20260717`, `SPX_state_gamma_20260717`, and `SPX_orderflow_20260717`.\n\nA V2 request must include one matching `{ticker}_spot` group for each analytics ticker. List each spot group once in a POST body. Repeat it for each applicable V2 hub in a PATCH body.\n"
       },
-      "websocket_urls": {
+      "websocket_v2_urls": {
         "type": "object",
-        "description": "Map of hub name to signed WebSocket URL. Contains every hub authorized for the API key.",
+        "additionalProperties": false,
+        "description": "Map of authorized V2 hub names to signed WebSocket URLs. Spot uses these same connections and has no separate URL.",
+        "properties": {
+          "v2_classic": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for the V2 Classic GEX hub."
+          },
+          "v2_state_gex": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for the V2 State GEX Profile hub."
+          },
+          "v2_state_greeks_zero": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for the V2 standard State Greeks 0DTE hub."
+          },
+          "v2_state_greeks": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for V2 explicit-expiry State Greeks groups."
+          },
+          "v2_state_greeks_one": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for the V2 State Greeks 1DTE+ hub."
+          },
+          "v2_orderflow": {
+            "type": "string",
+            "format": "uri",
+            "description": "Connection URL for the V2 Orderflow hub."
+          }
+        }
+      },
+      "websocket_legacy_urls": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Map of current-generation hub names to signed WebSocket URLs for the deprecated GET compatibility flow.",
         "properties": {
           "classic": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for the Classic GEX hub."
+            "description": "Connection URL for the current Classic GEX hub."
           },
           "state_gex": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for the State GEX Profile hub."
+            "description": "Connection URL for the current State GEX Profile hub."
           },
           "state_greeks_zero": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for the standard State Greeks 0DTE hub."
+            "description": "Connection URL for the current standard State Greeks 0DTE hub."
           },
           "state_greeks": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for explicit-expiry State Greeks groups."
+            "description": "Connection URL for current explicit-expiry State Greeks groups."
           },
           "state_greeks_one": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for the State Greeks 1DTE+ hub."
+            "description": "Connection URL for the current State Greeks 1DTE+ hub."
           },
           "orderflow": {
             "type": "string",
             "format": "uri",
-            "description": "Connection URL for the Orderflow hub."
+            "description": "Connection URL for the current Orderflow hub."
           }
         }
       },
@@ -1932,15 +1985,16 @@
             "items": {
               "$ref": "#/components/schemas/websocket_group_name"
             },
-            "description": "Complete initial set of groups to auto-join after connecting to the returned hub URLs."
+            "description": "Complete initial analytics and spot group set. The server auto-joins these memberships on the returned V2 hub connections."
           }
         },
         "example": {
           "groups": [
             "SPX_classic_gex_full",
             "SPX_state_gamma_zero",
+            "SPX_spot",
             "ES_SPX_orderflow_orderflow",
-            "SOXL_state_gamma_20260717"
+            "ES_SPX_spot"
           ]
         }
       },
@@ -1951,17 +2005,25 @@
         ],
         "properties": {
           "websocket_urls": {
-            "$ref": "#/components/schemas/websocket_urls"
+            "description": "V2 URLs for an analytics-and-spot request, or current-generation URLs for a compatibility request with no spot groups.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/websocket_v2_urls"
+              },
+              {
+                "$ref": "#/components/schemas/websocket_legacy_urls"
+              }
+            ]
           }
         },
         "example": {
           "websocket_urls": {
-            "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
-            "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
-            "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
-            "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>",
-            "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
-            "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
+            "v2_classic": "wss://ws.gex.bot:443/client/hubs/v2_classic?access_token=example",
+            "v2_state_gex": "wss://ws.gex.bot:443/client/hubs/v2_state_gex?access_token=example",
+            "v2_state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks_zero?access_token=example",
+            "v2_state_greeks": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks?access_token=example",
+            "v2_state_greeks_one": "wss://ws.gex.bot:443/client/hubs/v2_state_greeks_one?access_token=example",
+            "v2_orderflow": "wss://ws.gex.bot:443/client/hubs/v2_orderflow?access_token=example"
           }
         }
       },
@@ -1991,26 +2053,34 @@
             "items": {
               "$ref": "#/components/schemas/websocket_group_update_item"
             },
-            "description": "Complete desired group set. Omitted groups are removed from active subscriptions."
+            "description": "Complete desired hub-and-group membership set. Omitted memberships are removed. New custom Quant clients should send V2 hubs and colocated spot memberships."
           }
         },
         "example": {
           "groups": [
             {
-              "hub": "classic",
+              "hub": "v2_classic",
               "group": "SPX_classic_gex_full"
             },
             {
-              "hub": "state_greeks_zero",
+              "hub": "v2_classic",
+              "group": "SPX_spot"
+            },
+            {
+              "hub": "v2_state_greeks_zero",
               "group": "SPX_state_gamma_zero"
             },
             {
-              "hub": "orderflow",
+              "hub": "v2_state_greeks_zero",
+              "group": "SPX_spot"
+            },
+            {
+              "hub": "v2_orderflow",
               "group": "ES_SPX_orderflow_orderflow"
             },
             {
-              "hub": "state_greeks",
-              "group": "SOXL_state_gamma_20260717"
+              "hub": "v2_orderflow",
+              "group": "ES_SPX_spot"
             }
           ]
         }
@@ -2025,7 +2095,7 @@
           "updated_groups": {
             "type": "integer",
             "format": "int32",
-            "description": "Total number of active groups after replacement."
+            "description": "Total number of active hub-and-group memberships after replacement."
           },
           "hubs": {
             "type": "object",
@@ -2033,18 +2103,18 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Count of active groups by hub after replacement."
+            "description": "Count of active group memberships by V2 hub after replacement."
           }
         },
         "example": {
-          "updated_groups": 3,
+          "updated_groups": 6,
           "hubs": {
-            "classic": 1,
-            "state_gex": 0,
-            "state_greeks_zero": 1,
-            "state_greeks": 1,
-            "state_greeks_one": 0,
-            "orderflow": 1
+            "v2_classic": 2,
+            "v2_state_gex": 0,
+            "v2_state_greeks_zero": 2,
+            "v2_state_greeks": 0,
+            "v2_state_greeks_one": 0,
+            "v2_orderflow": 2
           }
         }
       },
@@ -2056,21 +2126,21 @@
         ],
         "properties": {
           "websocket_urls": {
-            "$ref": "#/components/schemas/websocket_urls"
+            "$ref": "#/components/schemas/websocket_legacy_urls"
           },
           "prefix": {
             "type": "string",
-            "description": "Legacy prefix to prepend to group names when sending joinGroup messages."
+            "description": "Legacy prefix to prepend to group names when sending `joinGroup` messages."
           }
         },
         "example": {
           "websocket_urls": {
-            "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=<access_token>",
-            "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=<access_token>",
-            "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=<access_token>",
-            "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=<access_token>",
-            "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=<access_token>",
-            "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=<access_token>"
+            "classic": "wss://ws.gex.bot:443/client/hubs/classic?access_token=example",
+            "state_gex": "wss://ws.gex.bot:443/client/hubs/state_gex?access_token=example",
+            "state_greeks_zero": "wss://ws.gex.bot:443/client/hubs/state_greeks_zero?access_token=example",
+            "state_greeks": "wss://ws.gex.bot:443/client/hubs/state_greeks?access_token=example",
+            "state_greeks_one": "wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=example",
+            "orderflow": "wss://ws.gex.bot:443/client/hubs/orderflow?access_token=example"
           },
           "prefix": "blue"
         }
@@ -2305,6 +2375,14 @@
         "required": true,
         "schema": {
           "$ref": "#/components/schemas/category_classic"
+        }
+      },
+      "orderflow_category_in_path": {
+        "name": "category",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/category_orderflow"
         }
       },
       "state_category_in_path": {

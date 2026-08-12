@@ -56,9 +56,9 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | `GET https://api.gex.bot/tickers/quant`      | List Quant ticker symbols                            |
 | `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups          |
 | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                             |
-| `POST /negotiate`                            | Negotiate WebSocket URLs and initial groups          |
-| `PATCH /negotiate`                           | Replace active WebSocket groups without reconnecting |
-| `GET /negotiate`                             | Legacy WebSocket negotiation (deprecated)            |
+| `POST /negotiate`                            | Negotiate V2 WebSocket URLs, analytics, and spot groups |
+| `PATCH /negotiate`                           | Replace active V2 WebSocket groups without reconnecting |
+| `GET /negotiate`                             | Legacy WebSocket negotiation compatibility             |
 
 #### gexbot research (gbR)
 
@@ -223,14 +223,20 @@ Subscriptions are available for different data packages at https://www.gexbot.co
 
 ## websocket real-time feed
 
-Quant API users should use `POST /negotiate` to receive authorized hub URLs and auto-join initial groups. Use
-`PATCH /negotiate` to replace active group subscriptions without reconnecting. Legacy `GET /negotiate` is deprecated.
+Quant API users should send the complete analytics group set and one matching `{ticker}_spot` group for each
+analytics ticker to `POST /negotiate`. The server returns authorized `v2_*` hub URLs and joins the initial memberships.
+Analytics and spot use separate groups on the same V2 connections. Spot messages use the `proto.spot` type URL.
+A POST request with no spot groups remains on the current-generation hubs for compatibility.
 
-Realtime WebSocket groups include the standard full/zero/one groups plus explicit-expiry groups such as
-`SPX_state_gamma_20260717`. Explicit-expiry State Greeks groups use the `state_greeks` hub, while standard
-0DTE/1DTE State Greeks remain on `state_greeks_zero`/`state_greeks_one`. Use `GET /v2/options/{ticker}/expiries` to
-discover valid expiry dates and
+Use `PATCH /negotiate` to replace the complete V2 membership set without reconnecting. Repeat each spot membership on
+every V2 hub that has analytics for that ticker. Spot memberships count toward the WebSocket group limit.
+
+Realtime analytics groups include the standard full/zero/one groups and explicit-expiry groups such as
+`SPX_state_gamma_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates. Use
 `GET https://api.gex.bot/tickers/quant` to discover additional Quant tickers.
+
+Custom Quant use of `GET /negotiate` is deprecated and should migrate to POST and PATCH. Official Orderflow
+integrations continue to use the GET compatibility flow.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
 
