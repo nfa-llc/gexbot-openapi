@@ -47,6 +47,18 @@
 - Configure HTTP client timeouts to 1 second or less.
 - Keep the JSON spec in sync with the YAML spec after changes.
 
+## documentation language (ASD-STE100)
+
+Write each file that explains this repo in **ASD-STE100 (Simplified Technical English)**: `AGENTS.md`, `README.md`,
+everything under `docs/`, and every `summary`, `description` and `title` field in `latest/gexbot.spec3.yaml`.
+
+- Use the active voice. Use the imperative for an instruction.
+- Give one instruction in one sentence. Keep an instruction to 20 words, a description to 25.
+- Use one term for one thing, in every file. Do not call an "API key" a "token" in the next paragraph.
+- Use a simple tense. Do not use an `-ing` form as a verb or a noun.
+- Keep a noun cluster to three words. Keep the articles: "set the connection string", not "set connection string".
+- Never reword code. Identifiers, commands, paths, setting names and error strings stay exact.
+
 ## example patterns
 - Classic endpoint: `/{ticker}/classic/{category}` → `basic_response`
 - State endpoint: `/{ticker}/state/{category}` → `basic_response`
