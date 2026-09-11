@@ -247,9 +247,6 @@ paths:
         '403':
           $ref: '#/components/responses/403'
   /{package}/categories:
-    servers:
-      - url: https://api.gex.bot
-        description: Primary API server for non-v2 routes
     get:
       summary: List data categories for a package
       description: Returns the available data category names for a package. Use these names when building REST requests or WebSocket groups.
@@ -282,15 +279,10 @@ paths:
         '403':
           $ref: '#/components/responses/403'
   /tickers/quant:
-    servers:
-      - url: https://api.gex.bot
-        description: Primary API server for non-v2 routes
     get:
       summary: List Quant ticker symbols
       description: |
         Returns additional stock and index ticker symbols available to Quant subscribers on the realtime WebSocket feed. These tickers are WebSocket/PubSub-only: they can publish standard realtime groups and explicit-expiry realtime groups, but are not REST chart/history endpoints.
-
-        This route is served at `GET https://api.gex.bot/tickers/quant`.
       tags:
         - Quant
       security:

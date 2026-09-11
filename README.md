@@ -53,7 +53,7 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | `GET`   | `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                      |
 | `GET`   | `/tickers`                                   | List available ticker symbols                           |
 | `GET`   | `/{package}/categories`                      | List available data category names for a package        |
-| `GET`   | `/tickers/quant` [^1]                        | List Quant ticker symbols                               |
+| `GET`   | `/tickers/quant`                             | List Quant ticker symbols                               |
 | `GET`   | `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups             |
 | `GET`   | `/futures/conversion`                        | Convert a cash ticker price to a futures price          |
 | `GET`   | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                                |
@@ -61,8 +61,6 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | `POST`  | `/negotiate`                                 | Negotiate V2 WebSocket URLs, analytics, and spot groups |
 | `PATCH` | `/negotiate`                                 | Replace active V2 WebSocket groups without reconnecting |
 | `GET`   | `/negotiate`                                 | Legacy WebSocket negotiation compatibility              |
-
-[^1]: `/tickers/quant` and `/{package}/categories` are served from `https://api.gex.bot`, not the `/v2` base URL.
 
 #### gexbot research (gbR)
 
@@ -237,7 +235,7 @@ every V2 hub that has analytics for that ticker. Spot memberships count toward t
 
 Realtime analytics groups include the standard full/zero/one groups and explicit-expiry groups such as
 `SPX_state_gamma_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates. Use
-`GET https://api.gex.bot/tickers/quant` to discover additional Quant tickers.
+`GET /v2/tickers/quant` to discover additional Quant tickers.
 
 Custom Quant use of `GET /negotiate` is deprecated and should migrate to POST and PATCH. Official Orderflow
 integrations continue to use the GET compatibility flow.

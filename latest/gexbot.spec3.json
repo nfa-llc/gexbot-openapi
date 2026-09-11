@@ -435,12 +435,6 @@
       }
     },
     "/{package}/categories": {
-      "servers": [
-        {
-          "url": "https://api.gex.bot",
-          "description": "Primary API server for non-v2 routes"
-        }
-      ],
       "get": {
         "summary": "List data categories for a package",
         "description": "Returns the available data category names for a package. Use these names when building REST requests or WebSocket groups.",
@@ -493,15 +487,9 @@
       }
     },
     "/tickers/quant": {
-      "servers": [
-        {
-          "url": "https://api.gex.bot",
-          "description": "Primary API server for non-v2 routes"
-        }
-      ],
       "get": {
         "summary": "List Quant ticker symbols",
-        "description": "Returns additional stock and index ticker symbols available to Quant subscribers on the realtime WebSocket feed. These tickers are WebSocket/PubSub-only: they can publish standard realtime groups and explicit-expiry realtime groups, but are not REST chart/history endpoints.\n\nThis route is served at `GET https://api.gex.bot/tickers/quant`.\n",
+        "description": "Returns additional stock and index ticker symbols available to Quant subscribers on the realtime WebSocket feed. These tickers are WebSocket/PubSub-only: they can publish standard realtime groups and explicit-expiry realtime groups, but are not REST chart/history endpoints.\n",
         "tags": [
           "Quant"
         ],
