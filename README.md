@@ -42,29 +42,33 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 
 #### gexbot
 
-| Endpoint                                     | Description                                          |
-|----------------------------------------------|------------------------------------------------------|
-| `/{ticker}/classic/{category}`               | Classic GEX chart data                               |
-| `/{ticker}/state/{category}`                 | State greeks chart data                              |
-| `/{ticker}/orderflow/orderflow`              | Orderflow metrics                                    |
-| `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)                             |
-| `/{ticker}/state/{category}/majors`          | Key GEX levels (state)                               |
-| `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic)                 |
-| `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                   |
-| `/tickers`                                   | List available ticker symbols                        |
-| `/{package}/categories`                      | List available data category names for a package     |
-| `GET https://api.gex.bot/tickers/quant`      | List Quant ticker symbols                            |
-| `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups          |
-| `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                             |
-| `POST /negotiate`                            | Negotiate V2 WebSocket URLs, analytics, and spot groups |
-| `PATCH /negotiate`                           | Replace active V2 WebSocket groups without reconnecting |
-| `GET /negotiate`                             | Legacy WebSocket negotiation compatibility             |
+| Method  | Endpoint                                     | Description                                             |
+|---------|----------------------------------------------|---------------------------------------------------------|
+| `GET`   | `/{ticker}/classic/{category}`               | Classic GEX chart data                                  |
+| `GET`   | `/{ticker}/state/{category}`                 | State greeks chart data                                 |
+| `GET`   | `/{ticker}/orderflow/orderflow`              | Orderflow metrics                                       |
+| `GET`   | `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)                                |
+| `GET`   | `/{ticker}/state/{category}/majors`          | Key GEX levels (state)                                  |
+| `GET`   | `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic)                    |
+| `GET`   | `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                      |
+| `GET`   | `/tickers`                                   | List available ticker symbols                           |
+| `GET`   | `/{package}/categories`                      | List available data category names for a package        |
+| `GET`   | `/tickers/quant` [^1]                        | List Quant ticker symbols                               |
+| `GET`   | `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups             |
+| `GET`   | `/futures/conversion`                        | Convert a cash ticker price to a futures price          |
+| `GET`   | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                                |
+| `GET`   | `/hist/eod/{ticker}`                         | Download the latest end-of-day ZIP report               |
+| `POST`  | `/negotiate`                                 | Negotiate V2 WebSocket URLs, analytics, and spot groups |
+| `PATCH` | `/negotiate`                                 | Replace active V2 WebSocket groups without reconnecting |
+| `GET`   | `/negotiate`                                 | Legacy WebSocket negotiation compatibility              |
+
+[^1]: `/tickers/quant` and `/{package}/categories` are served from `https://api.gex.bot`, not the `/v2` base URL.
 
 #### gexbot research (gbR)
 
-| Endpoint                      | Description                                 |
-|-------------------------------|---------------------------------------------|
-| `/research/{ticker}/{metric}` | Research chart data for a ticker and metric |
+| Method | Endpoint                      | Description                                 |
+|--------|-------------------------------|---------------------------------------------|
+| `GET`  | `/research/{ticker}/{metric}` | Research chart data for a ticker and metric |
 
 ### example
 

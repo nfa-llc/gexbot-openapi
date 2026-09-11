@@ -608,6 +608,91 @@
         }
       }
     },
+    "/futures/conversion": {
+      "get": {
+        "summary": "Convert a cash ticker price to a synthetic futures price",
+        "description": "Returns the terms that convert a cash ticker price to a synthetic futures price. Multiply the cash price by `multiplier`, then add `additive`.\n\nThe service fits the terms over the most recent 30 minutes of 1-minute data. Synthetic futures tickers such as `ES_SPX` are not valid source tickers.\n",
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ],
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "query",
+            "required": true,
+            "description": "Cash source ticker. Use a stock or an index ticker.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ticker_stock"
+                },
+                {
+                  "$ref": "#/components/schemas/ticker_index"
+                }
+              ]
+            }
+          },
+          {
+            "name": "future",
+            "in": "query",
+            "required": true,
+            "description": "Synthetic futures root to convert to.",
+            "schema": {
+              "$ref": "#/components/schemas/synth_future_ticker"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "description": "Conversion model. An omitted model defaults to `additive` for an index source ticker and `affine` for a stock source ticker.",
+            "schema": {
+              "$ref": "#/components/schemas/futures_conversion_model"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The futures conversion terms.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/futures_conversion_response"
+                },
+                "example": {
+                  "future_contract": "ESH6",
+                  "multiplier": 1,
+                  "additive": 34.25
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          }
+        }
+      }
+    },
     "/hist/{ticker}/{package}/{category}/{date}": {
       "get": {
         "summary": "Download historical data for a specific ticker, package, category, and date",
@@ -706,6 +791,86 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          }
+        }
+      }
+    },
+    "/hist/eod/{ticker}": {
+      "get": {
+        "summary": "Download the latest end-of-day report for a ticker",
+        "description": "Returns a ZIP archive with the most recent end-of-day historical files for the ticker. The archive holds only the packages that your subscription includes.\n\nThe report for the current Eastern date becomes available after 17:00 Eastern time. Before that hour, the endpoint returns the report for the previous date.\n",
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ],
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "application/zip"
+              ]
+            },
+            "description": "Optional. Set to \"application/zip\"."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The end-of-day ZIP report.",
+            "headers": {
+              "Content-Disposition": {
+                "description": "Attachment header with the file name `eod_report_{ticker}_{date}.zip`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "503": {
+            "description": "Service Unavailable. The storage fetch failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
           }
         }
       }
@@ -1285,6 +1450,52 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
             "description": "All valid option expiries in YYYY-MM-DD format within the published horizon."
+          }
+        }
+      },
+      "synth_future_ticker": {
+        "type": "string",
+        "description": "Synthetic futures root symbol.",
+        "enum": [
+          "NQ",
+          "ES",
+          "RTY",
+          "YM",
+          "GC",
+          "SI",
+          "CL"
+        ]
+      },
+      "futures_conversion_model": {
+        "type": "string",
+        "description": "Model that the service uses to fit the conversion terms.",
+        "enum": [
+          "additive",
+          "multiplicative",
+          "affine"
+        ]
+      },
+      "futures_conversion_response": {
+        "type": "object",
+        "required": [
+          "future_contract",
+          "multiplier",
+          "additive"
+        ],
+        "properties": {
+          "future_contract": {
+            "type": "string",
+            "description": "Futures contract that the conversion uses."
+          },
+          "multiplier": {
+            "type": "number",
+            "format": "double",
+            "description": "Multiply the cash price by this value."
+          },
+          "additive": {
+            "type": "number",
+            "format": "double",
+            "description": "Add this value after you apply the multiplier."
           }
         }
       },
