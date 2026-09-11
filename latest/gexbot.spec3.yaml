@@ -2,7 +2,7 @@
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.3.0
+  version: 2.4.0
   termsOfService: "https://www.gexbot.com/terms-and-conditions"
 servers:
   - url: https://api.gex.bot/v2
@@ -50,11 +50,13 @@ paths:
         - $ref: "#/components/parameters/accept_header"
       responses:
         "200":
-          description: Chart data response
+          description: State data response. The gex categories return the GEX profile shape. The greek categories return the options profile shape.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/basic_response"
+                oneOf:
+                  - $ref: "#/components/schemas/basic_response"
+                  - $ref: "#/components/schemas/option_profile_response"
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -130,7 +132,7 @@ paths:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/state_category_in_path"
+        - $ref: "#/components/parameters/gex_category_in_path"
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
@@ -187,7 +189,7 @@ paths:
         - bearer_auth: [ ]
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
-        - $ref: "#/components/parameters/state_category_in_path"
+        - $ref: "#/components/parameters/gex_category_in_path"
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
@@ -1164,6 +1166,31 @@ components:
         max_priors:
           $ref: '#/components/schemas/max_priors'
 
+    option_profile_response:
+      type: object
+      description: Response for the state package greek categories (delta, gamma, vanna, charm). The values are net taker imbalances from the orderflow classification engine.
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        ticker:
+          $ref: '#/components/schemas/ticker'
+        spot:
+          $ref: '#/components/schemas/_double'
+        min_dte:
+          $ref: '#/components/schemas/_int'
+        sec_min_dte:
+          $ref: '#/components/schemas/_int'
+        major_positive:
+          $ref: '#/components/schemas/_float'
+        major_negative:
+          $ref: '#/components/schemas/_float'
+        major_long_gamma:
+          $ref: '#/components/schemas/major_long_gamma'
+        major_short_gamma:
+          $ref: '#/components/schemas/major_short_gamma'
+        mini_contracts:
+          $ref: '#/components/schemas/mini_contracts'
+
     orderflow_response:
       properties:
         timestamp:
@@ -1239,28 +1266,6 @@ components:
         one_gexoflow:
           $ref: '#/components/schemas/_float'
         one_cvroflow:
-          $ref: '#/components/schemas/_float'
-        min_dte:
-          $ref: '#/components/schemas/_int'
-        sec_min_dte:
-          $ref: '#/components/schemas/_int'
-        zero_gamma:
-          $ref: '#/components/schemas/_float'
-        major_pos_vol:
-          $ref: '#/components/schemas/_float'
-        major_pos_oi:
-          $ref: '#/components/schemas/_float'
-        major_neg_vol:
-          $ref: '#/components/schemas/_float'
-        major_neg_oi:
-          $ref: '#/components/schemas/_float'
-        strikes:
-          $ref: '#/components/schemas/strikes'
-        sum_gex_vol:
-          $ref: '#/components/schemas/_float'
-        sum_gex_oi:
-          $ref: '#/components/schemas/_float'
-        delta_risk_reversal:
           $ref: '#/components/schemas/_float'
       type: object
 
@@ -1667,6 +1672,7 @@ components:
       $ref: "#/components/schemas/_float"
     mini_contracts:
       type: array
+      description: Strike rows. Each row is [strike, call_ivol, put_ivol, greek value, priors array, put classified volume, put volume priors]. The put volume entries return null in public API responses.
       items:
         type: array
     strikes:
@@ -1790,6 +1796,13 @@ components:
       name: category
       in: path
       required: true
+      schema:
+        $ref: "#/components/schemas/category_classic"
+    gex_category_in_path:
+      name: category
+      in: path
+      required: true
+      description: GEX aggregation category. The majors and max change routes accept gex_full, gex_zero, gex_one, or the aliases full, zero, one.
       schema:
         $ref: "#/components/schemas/category_classic"
     orderflow_category_in_path:
