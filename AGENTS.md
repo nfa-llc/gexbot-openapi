@@ -4,10 +4,12 @@
 - OpenAPI specification for the NFA gexbot API.
 - The API provides GEX (Gamma Exposure), greeks, orderflow, majors and max change data for enumerated tickers and categories. It also provides research charts, option expiries, futures conversion terms, history downloads, end-of-day reports and WebSocket negotiation.
 - Spec version: 2.5.0. Server: `https://api.gex.bot/v2`. Every route in this file is relative to the server URL.
+- The API generation is the `v2` in the server URL. `info.version` is the version of this document, which OpenAPI defines as distinct from the API version. A release sets the major part and the minor part. The nightly build raises the patch part when the contract content changes. A raised patch marks a new document, not a compatible change to the API.
 
 ## key files & structure
-- `latest/gexbot.spec3.yaml`: The main OpenAPI 3.0.1 specification (source of truth).
-- `latest/gexbot.spec3.json`: JSON conversion of the YAML spec.
+- `latest/gexbot.spec3.yaml`: The published OpenAPI 3.0.1 specification. It is generated output, not the source.
+- `latest/gexbot.spec3.json`: The JSON twin of the YAML. It is generated output too.
+- `scripts/spec-version.py`: States `info.version` consistently in the four files that carry it. Run `--check` to prove they agree, and `--sync` to repair the twin and the prose after a hand edit to the YAML.
 - `README.md`: Project overview, endpoint table, subscription tiers, and related repo links.
 - `docs/websocket.md`: The WebSocket real-time feed guide for the `/negotiate` operations.
 
@@ -29,8 +31,9 @@
   `/research` and `/hist`.
 
 ## developer workflows
-- To update the API, edit `latest/gexbot.spec3.yaml` directly.
-- Regenerate the JSON spec from the YAML when the YAML changes.
+- Do not edit `latest/` by hand. Both files are generated from `specs/public.yaml` in the private repository `nfa-llc/nfa-api-openapi-spec`, and the nightly build overwrites a hand edit.
+- To change the published specification, change that source. An operation marked `x-public: false` there is held back from this repository.
+- Run `python scripts/spec-version.py --check` to prove the version agrees in every file. Run `--sync` to repair the JSON twin and the prose lines.
 - Integration tests live in the private `nfa-api-openapi-spec` repo (`tests/run_api_tests.http`).
 - Validate the spec using external tools (e.g., Swagger Editor, openapi-generator-cli) as needed.
 

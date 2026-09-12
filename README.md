@@ -26,6 +26,20 @@ which covers two product offerings:
 
 The specification version is `2.5.0`.
 
+Both files are generated. The source is `specs/public.yaml` in the private
+repository `nfa-llc/nfa-api-openapi-spec`. A nightly build commits the result
+here, so `master` always carries the current build. Do not edit `latest/` by
+hand: the next build overwrites it. To change the published specification,
+change the source.
+
+### version
+
+The API generation is the `v2` in the base URL. `info.version` is the version
+of this document, which OpenAPI defines as distinct from the API version. A
+release sets the major part and the minor part. The nightly build raises the
+patch part when the contract content changes. A raised patch therefore marks a
+new document, not a compatible change to the API itself.
+
 ### base url
 
 ```

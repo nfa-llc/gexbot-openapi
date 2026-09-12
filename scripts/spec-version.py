@@ -1,4 +1,9 @@
-"""Read, check and bump the published specification version.
+"""State the published specification version consistently.
+
+The private repository nfa-api-openapi-spec owns the version: it sets
+``info.version`` in specs/public.yaml and the nightly build carries it here.
+This tool never decides a version. It states the one the YAML already has, and
+it proves the four files agree.
 
 The version appears in four places, and they must always agree:
 
@@ -10,8 +15,6 @@ The version appears in four places, and they must always agree:
 Usage::
 
     python scripts/spec-version.py --check
-    python scripts/spec-version.py --bump patch
-    python scripts/spec-version.py --bump minor
     python scripts/spec-version.py --set 2.6.0
     python scripts/spec-version.py --sync
 
@@ -117,18 +120,6 @@ def sole_match(pattern: re.Pattern[str], text: str, label: str) -> re.Match[str]
     return matches[0]
 
 
-def next_version(current: str, part: str) -> str:
-    found = SEMVER.match(current)
-    if not found:
-        raise SystemExit(f"error: {current!r} is not a three-part semantic version")
-    major, minor, patch = (int(value) for value in found.groups())
-    if part == "major":
-        return f"{major + 1}.0.0"
-    if part == "minor":
-        return f"{major}.{minor + 1}.0"
-    return f"{major}.{minor}.{patch + 1}"
-
-
 def emit(version: str) -> None:
     print(f"version={version}")
     output = os.environ.get("GITHUB_OUTPUT")
@@ -210,7 +201,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--check", action="store_true", help="verify every file agrees; write nothing")
-    group.add_argument("--bump", choices=("major", "minor", "patch"), help="raise this part of the version")
     group.add_argument("--set", dest="explicit", metavar="X.Y.Z", help="set this exact version")
     group.add_argument(
         "--sync",
@@ -231,12 +221,9 @@ def main() -> int:
     if args.sync:
         # Repair only. The version itself does not move.
         return apply(current)
-    if args.explicit:
-        if not SEMVER.match(args.explicit):
-            raise SystemExit(f"error: {args.explicit!r} is not a three-part semantic version")
-        target = args.explicit
-    else:
-        target = next_version(current, args.bump)
+    if not SEMVER.match(args.explicit):
+        raise SystemExit(f"error: {args.explicit!r} is not a three-part semantic version")
+    target = args.explicit
 
     def ordinal(value: str) -> tuple:
         found = SEMVER.match(value)
