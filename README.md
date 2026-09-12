@@ -35,10 +35,10 @@ change the source.
 ### version
 
 The API generation is the `v2` in the base URL. `info.version` is the version
-of this document, which OpenAPI defines as distinct from the API version. A
-release sets the major part and the minor part. The nightly build raises the
-patch part when the contract content changes. A raised patch therefore marks a
-new document, not a compatible change to the API itself.
+of this document, which OpenAPI defines as distinct from the API version. The
+author of a change raises it in the source repository, in the same pull request
+that changes the contract. A raised patch therefore marks a new document, not a
+compatible change to the API itself.
 
 ### base url
 
