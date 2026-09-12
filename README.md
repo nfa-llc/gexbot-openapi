@@ -15,15 +15,16 @@ The NFA gexbot OpenAPI Specification.
 This repository contains the [OpenAPI 3.0.1](https://spec.openapis.org/oas/v3.0.1) specification for the NFA gexbot API,
 which covers two product offerings:
 
-- **gexbot** — Options-derived market data including GEX (Gamma Exposure), greeks, and orderflow metrics for enumerated
-  tickers.
+- **gexbot** — Options-derived market data: GEX (Gamma Exposure), greeks and orderflow metrics for enumerated tickers.
 - **gexbot research** (`gbR`) — Chart and analytical data for a broad range of options metrics across any supported
-  ticker, with flexible output formats, views, and filtering.
+  ticker, with a choice of output format, view and filter.
 
 ## spec
 
 - [YAML](latest/gexbot.spec3.yaml)
 - [JSON](latest/gexbot.spec3.json)
+
+The specification version is `2.5.0`.
 
 ### base url
 
@@ -31,10 +32,13 @@ which covers two product offerings:
 https://api.gex.bot/v2
 ```
 
+A route in this document without a host is relative to this base URL. The same host also serves the legacy v1 routes without the
+`/v2` prefix. This specification covers the v2 contract only.
+
 ### authentication
 
-All endpoints except `/tickers` and `/{package}/categories` require a valid API key passed as a Bearer token in the
-`Authorization` header.
+All endpoints except `/tickers`, `/tickers/quant` and `/{package}/categories` require a valid API key in the
+`Authorization` header with the `Bearer` scheme. Every request must also include a `User-Agent` header.
 Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`)
 key for the `/research` endpoints. Keys are not interchangeable between products.
 
@@ -45,15 +49,15 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | Method  | Endpoint                                     | Description                                             |
 |---------|----------------------------------------------|---------------------------------------------------------|
 | `GET`   | `/{ticker}/classic/{category}`               | Classic GEX chart data                                  |
-| `GET`   | `/{ticker}/state/{category}`                 | State greeks chart data                                 |
-| `GET`   | `/{ticker}/orderflow/orderflow`              | Orderflow metrics                                       |
+| `GET`   | `/{ticker}/state/{category}`                 | State GEX and greeks chart data                         |
+| `GET`   | `/{ticker}/orderflow/{category}`             | Orderflow metrics (category `orderflow`)                |
 | `GET`   | `/{ticker}/classic/{category}/majors`        | Key GEX levels (classic)                                |
 | `GET`   | `/{ticker}/state/{category}/majors`          | Key GEX levels (state)                                  |
 | `GET`   | `/{ticker}/classic/{category}/maxchange`     | Max GEX change by lookback (classic)                    |
 | `GET`   | `/{ticker}/state/{category}/maxchange`       | Max GEX change by lookback (state)                      |
 | `GET`   | `/tickers`                                   | List available ticker symbols                           |
 | `GET`   | `/{package}/categories`                      | List available data category names for a package        |
-| `GET`   | `/tickers/quant`                             | List Quant ticker symbols                               |
+| `GET`   | `/tickers/quant`                             | List Quant WebSocket-only tickers (no API key)          |
 | `GET`   | `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups             |
 | `GET`   | `/futures/conversion`                        | Convert a cash ticker price to a futures price          |
 | `GET`   | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                                |
@@ -83,6 +87,8 @@ Accept: application/json
 > header (e.g., `gexbot_custom_your-secret-key`).
 
 **Response**
+
+The example shows four strike rows. A live response returns every strike.
 
 ```json
 {
@@ -121,7 +127,6 @@ Accept: application/json
         -42.97
       ]
     ],
-    // Trimmed for brevity
     [
       7380,
       44.16,
@@ -196,49 +201,56 @@ Accept: application/json
 
 **Query parameters (all optional)**
 
-| Parameter           | Type    | Description                                                       |
-|---------------------|---------|-------------------------------------------------------------------|
-| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `json`, `csv`, `webp` |
-| `view`              | string  | Chart view: `skew`, `term`, `surface`                             |
-| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                 |
-| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                    |
-| `strikes`           | number  | Number of strikes to include                                      |
-| `start_dte`         | number  | Start DTE filter                                                  |
-| `end_dte`           | number  | End DTE filter                                                    |
-| `expiration_filter` | string  | Expiration date filter                                            |
-| `contract_agg`      | boolean | Aggregate by contract                                             |
-| `expiry_agg`        | boolean | Aggregate by expiry                                               |
-| `skew_adj`          | boolean | Apply skew adjustment                                             |
-| `limit_y`           | boolean | Limit y-axis range                                                |
-| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                          |
-| `moneyness_filter`  | string  | Filter by moneyness: `atm`, `itm`, `ntm`, `otm`                   |
+| Parameter           | Type    | Description                                                                               |
+|---------------------|---------|-------------------------------------------------------------------------------------------|
+| `format`            | string  | Output format: `png`, `jpeg`, `svg`, `pdf`, `json`, `csv`, `webp`                         |
+| `view`              | string  | Chart view: `skew`, `term`, `surface`, `mirror`                                           |
+| `type`              | string  | Chart type: `line`, `histogram`, `scatter`, `bar`                                         |
+| `theme`             | string  | Color theme: `light`, `dark` (default: `dark`)                                            |
+| `strikes`           | integer | Number of strikes to include                                                              |
+| `start_dte`         | integer | Start DTE filter                                                                          |
+| `end_dte`           | integer | End DTE filter                                                                            |
+| `expiration_filter` | string  | Expiration date filter                                                                    |
+| `contract_agg`      | boolean | Aggregate by contract                                                                     |
+| `expiry_agg`        | boolean | Aggregate by expiry                                                                       |
+| `skew_adj`          | boolean | Apply skew adjustment                                                                     |
+| `limit_y`           | boolean | Limit y-axis range                                                                        |
+| `series`            | string  | Term-view series: `moneyness`, `strikes`, `deltas`                                        |
+| `contract_filter`   | string  | Filter contracts: `calls`, `puts`, `all`                                                  |
+| `moneyness_filter`  | string  | Filter by moneyness or delta band: `atm`, `itm`, `ntm`, `otm`, `d10`, `d15`, `d20`, `d25` |
+
+Send `Accept: text/csv` when `format` is `csv`. Send `Accept: application/json` for every other format.
 
 ### subscription tiers
 
 Subscriptions are available for different data packages at https://www.gexbot.com/:
 
-- **Classic** — Classic GEX data
-- **State** — State greeks data
-- **Orderflow** — Orderflow metrics
-- **Quant** — Full access including historical data and WebSocket feeds
-- **Research** — gexbot research (`gbR`) access for chart and analytical data across any ticker and metric
+- **Classic** — the classic package and the EOD report
+- **State** — Classic plus the state package
+- **Orderflow** — State plus the orderflow package
+- **Quant** — every package, the 90-day history downloads, the option expiries and the WebSocket feeds
+- **Research** (add-on) — a **gexbot research** (`gbR`) key for the `/research` endpoints. The add-on is separate from
+  the tiers above.
 
 ## websocket real-time feed
 
-Quant API users should send the complete analytics group set and one matching `{ticker}_spot` group for each
-analytics ticker to `POST /negotiate`. The server returns authorized `v2_*` hub URLs and joins the initial memberships.
-Analytics and spot use separate groups on the same V2 connections. Spot messages use the `proto.spot` type URL.
+The WebSocket feed requires a Quant API key for a custom integration. Send the complete analytics group set to
+`POST /negotiate`. Include one matching `{ticker}_spot` group for each analytics ticker. The server returns authorized
+`v2_*` hub URLs and joins the initial memberships.
+Analytics and spot use separate groups on the same V2 connections. Spot messages carry a type URL that contains
+`proto.spot`.
 A POST request with no spot groups remains on the current-generation hubs for compatibility.
 
 Use `PATCH /negotiate` to replace the complete V2 membership set without reconnecting. Repeat each spot membership on
 every V2 hub that has analytics for that ticker. Spot memberships count toward the WebSocket group limit.
 
 Realtime analytics groups include the standard full/zero/one groups and explicit-expiry groups such as
-`SPX_state_gamma_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates. Use
-`GET /v2/tickers/quant` to discover additional Quant tickers.
+`SPX_state_gamma_20260717`. Use `GET /options/{ticker}/expiries` to discover valid expiry dates. Use
+`GET /tickers/quant` to discover additional Quant tickers. This route requires no API key. These tickers stream on the
+WebSocket feed only. They are not valid on the REST chart routes.
 
-Custom Quant use of `GET /negotiate` is deprecated and should migrate to POST and PATCH. Official Orderflow
-integrations continue to use the GET compatibility flow.
+Do not use `GET /negotiate` for a new custom Quant integration. Move an existing custom integration to POST and PATCH.
+Official Orderflow integrations keep the GET flow.
 
 See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed documentation.
 

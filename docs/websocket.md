@@ -8,14 +8,16 @@ The feed uses Azure Web PubSub.
 The second-generation feed is called V2.
 V2 sends analytics and spot as separate messages.
 
+A route in this document without a host is relative to `https://api.gex.bot/v2`.
+
 ## recommended flow
 
 1. Build the complete initial analytics group set.
 2. Add one matching `{ticker}_spot` group for each analytics ticker.
-3. Send the unprefixed groups to `POST /v2/negotiate`.
+3. Send the unprefixed groups to `POST /negotiate`.
 4. Connect to the returned `v2_*` hub URLs.
 5. Listen for analytics and `proto.spot` messages on the same connections.
-6. Use `PATCH /v2/negotiate` to replace the complete membership set without reconnecting.
+6. Use `PATCH /negotiate` to replace the complete membership set without reconnecting.
 
 The server joins the initial groups from the POST request.
 Do not send `joinGroup` messages for this flow.
@@ -90,6 +92,12 @@ Explicit-expiration groups use these formats:
 {ticker}_orderflow_YYYYMMDD
 ```
 
+The date must have 8 digits.
+The date must be a listed expiry for the ticker.
+The date must be between today and 90 days ahead, in Eastern Time.
+Synthetic futures tickers such as `ES_SPX` and `NQ_NDX` have no explicit-expiration groups.
+An invalid date returns `400 Bad Request`.
+
 Explicit-expiration groups are real-time only.
 They are not stored in REST history.
 They publish at a lower cadence than standard groups.
@@ -97,13 +105,15 @@ They publish at a lower cadence than standard groups.
 Additional Quant tickers are available from:
 
 ```http
-GET https://api.gex.bot/tickers/quant
+GET https://api.gex.bot/v2/tickers/quant
 ```
 
+This route requires no API key.
+Send a `User-Agent` header.
 These additional tickers are WebSocket-only.
 They are not REST chart or history tickers.
 
-## POST /v2/negotiate
+## POST /negotiate
 
 List each spot group once in the POST body.
 The server expands that group onto each applicable V2 hub.
@@ -159,10 +169,24 @@ The response can include every V2 hub that the API key can use.
 Connect to each hub that your application uses.
 Connect before the access token expires.
 
-## spot messages
+## message envelope
+
+Each binary frame is a `google.protobuf.Any`.
+The `value` is Zstandard-compressed.
+The type URL contains one of these markers.
+Match on the marker, because the published type URL can carry a prefix.
+
+| Type URL contains | Message | Groups |
+|---|---|---|
+| `proto.gex` | `gex_profile.Gex` | classic and state gex groups |
+| `proto.greek` | `option_profile.OptionProfile` | state delta, gamma, vanna and charm groups |
+| `proto.orderflow` | `orderflow_proto.Orderflow` | orderflow groups |
+| `proto.spot` | `spot_price.SpotPrice` | spot groups |
+
+### spot messages
 
 Spot arrives in a `google.protobuf.Any` envelope.
-The type URL is:
+The type URL contains:
 
 ```text
 proto.spot
@@ -190,12 +214,14 @@ Analytics and spot for one calculation use the same ticker and timestamp.
 Do not assume which message arrives first.
 Cache either message briefly if your application must combine them.
 
-## PATCH /v2/negotiate
+## PATCH /negotiate
 
 PATCH replaces all active memberships for the current API WebSocket slot.
 Any omitted membership is removed.
 
-Each item must contain a V2 hub and an unprefixed group.
+Each item must contain the hub the client is connected to and an unprefixed group.
+Use `v2_*` hubs.
+A compatibility set with no spot groups uses the current-generation hub names.
 Repeat the spot membership on each V2 hub that has analytics for that ticker.
 
 ### request
@@ -239,6 +265,10 @@ Content-Type: application/json
 
 The client must have a live connection on each hub in the PATCH request.
 Use POST and connect before you add groups to a new hub.
+A request that names a hub with no live connection returns `409 Conflict`.
+
+Send `{"groups": []}` to remove every membership.
+This request needs no live connection.
 
 ## group limits
 
@@ -261,7 +291,7 @@ An over-limit request returns `403 Forbidden`.
 
 ## legacy GET compatibility
 
-`GET /v2/negotiate` returns current-generation hub URLs and a group prefix.
+`GET /negotiate` returns current-generation hub URLs and a group prefix.
 Clients manually send `joinGroup` messages after they connect.
 
 Custom Quant use of GET is deprecated.

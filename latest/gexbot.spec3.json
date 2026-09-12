@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions"
   },
   "servers": [
@@ -16,7 +16,7 @@
     "/{ticker}/classic/{category}": {
       "get": {
         "summary": "Get chart data for a ticker and category",
-        "description": "Returns chart data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "description": "Returns the classic GEX chain for a ticker and category. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.",
         "security": [
           {
             "bearer_auth": []
@@ -55,6 +55,12 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
           }
         },
         "tags": [
@@ -68,7 +74,7 @@
     "/{ticker}/state/{category}": {
       "get": {
         "summary": "Get state data for a ticker and category",
-        "description": "Returns state data for the specified ticker and category. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "description": "Returns the state data for a ticker and category. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.",
         "security": [
           {
             "bearer_auth": []
@@ -114,6 +120,12 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
           }
         },
         "tags": [
@@ -126,7 +138,7 @@
     "/{ticker}/orderflow/{category}": {
       "get": {
         "summary": "Get orderflow data for a ticker",
-        "description": "Returns orderflow data for the specified ticker. All parameters are strictly enumerated. Security is handled via API key or cookie.",
+        "description": "Returns the latest orderflow snapshot for the ticker. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.",
         "security": [
           {
             "bearer_auth": []
@@ -165,6 +177,22 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "description": "Internal Server Error. No orderflow snapshot is available for the ticker.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Failed to get redis chart data: null or zero length"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -187,7 +215,7 @@
             "$ref": "#/components/parameters/ticker_in_path"
           },
           {
-            "$ref": "#/components/parameters/classic_category_in_path"
+            "$ref": "#/components/parameters/gex_category_in_path"
           },
           {
             "$ref": "#/components/parameters/user_agent_header"
@@ -215,6 +243,35 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "Not Found. The server has no max change data for the ticker and category yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Chart not found."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "description": "Internal Server Error. The server could not compute the max change data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Failed to get max change"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -227,8 +284,8 @@
     },
     "/{ticker}/state/{category}/maxchange": {
       "get": {
-        "summary": "Get max change data for a ticker, package, and category",
-        "description": "Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker, package, and category.",
+        "summary": "Get max change data for a ticker and category",
+        "description": "Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker and category.",
         "security": [
           {
             "bearer_auth": []
@@ -267,6 +324,35 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "Not Found. The server has no max change data for the ticker and category yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Chart not found."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "description": "Internal Server Error. The server could not compute the max change data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Failed to get max change"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -278,60 +364,8 @@
     },
     "/{ticker}/classic/{category}/majors": {
       "get": {
-        "summary": "Get majors data for a ticker, package, and category",
-        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.",
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ticker_in_path"
-          },
-          {
-            "$ref": "#/components/parameters/classic_category_in_path"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent_header"
-          },
-          {
-            "$ref": "#/components/parameters/accept_header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Majors data response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/majors_response"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          }
-        },
-        "tags": [
-          "Classic",
-          "State",
-          "Orderflow",
-          "Quant"
-        ]
-      }
-    },
-    "/{ticker}/state/{category}/majors": {
-      "get": {
-        "summary": "Get majors data for a ticker, package, and category",
-        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker, package, and category.",
+        "summary": "Get majors data for a ticker and category",
+        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker and category.",
         "security": [
           {
             "bearer_auth": []
@@ -370,6 +404,70 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ]
+      }
+    },
+    "/{ticker}/state/{category}/majors": {
+      "get": {
+        "summary": "Get majors data for a ticker and category",
+        "description": "Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker and category.",
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/gex_category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "$ref": "#/components/parameters/accept_header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Majors data response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/majors_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
           }
         },
         "tags": [
@@ -382,7 +480,7 @@
     "/tickers": {
       "get": {
         "summary": "List all available ticker symbols",
-        "description": "Returns the list of available ticker symbols supported by the API, including stocks, indexes, and futures.",
+        "description": "Returns the ticker symbols that the API supports, in three lists: stocks, indexes, and futures.",
         "tags": [
           "Public"
         ],
@@ -432,11 +530,15 @@
           "400": {
             "$ref": "#/components/responses/400"
           },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
           "403": {
-            "$ref": "#/components/responses/403"
+            "description": "Forbidden. The client User-Agent is blocked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
           }
         }
       }
@@ -444,7 +546,7 @@
     "/{package}/categories": {
       "get": {
         "summary": "List data categories for a package",
-        "description": "Returns the available data category names for a package. Use these names when building REST requests or WebSocket groups.",
+        "description": "Returns the data category names for a package. Use these names in REST requests and WebSocket groups.",
         "tags": [
           "Public"
         ],
@@ -462,7 +564,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Data category names for the requested package.",
+            "description": "Data category names for the requested package. classic returns gex_full, gex_zero and gex_one. orderflow returns orderflow.",
             "content": {
               "application/json": {
                 "schema": {
@@ -476,7 +578,13 @@
                   "gex_zero",
                   "gex_one",
                   "delta_zero",
-                  "gamma_zero"
+                  "delta_one",
+                  "gamma_zero",
+                  "gamma_one",
+                  "vanna_zero",
+                  "vanna_one",
+                  "charm_zero",
+                  "charm_one"
                 ]
               }
             }
@@ -484,11 +592,18 @@
           "400": {
             "$ref": "#/components/responses/400"
           },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
           "403": {
-            "$ref": "#/components/responses/403"
+            "description": "Forbidden. The client User-Agent is blocked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found. The package is not classic, state or orderflow."
           }
         }
       }
@@ -496,15 +611,11 @@
     "/tickers/quant": {
       "get": {
         "summary": "List Quant ticker symbols",
-        "description": "Returns additional stock and index ticker symbols available to Quant subscribers on the realtime WebSocket feed. These tickers are WebSocket/PubSub-only: they can publish standard realtime groups and explicit-expiry realtime groups, but are not REST chart/history endpoints.\n",
+        "description": "Returns the additional stock and index ticker symbols that the realtime WebSocket feed publishes for Quant subscribers. The route needs no API key. The /v2 form still requires the User-Agent header. These tickers are WebSocket/PubSub-only: they publish standard realtime groups and explicit-expiry realtime groups. They are not valid on the REST chart or history routes. Only a Quant subscription can subscribe to these tickers.\n",
         "tags": [
-          "Quant"
+          "Public"
         ],
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ],
+        "security": [],
         "parameters": [
           {
             "$ref": "#/components/parameters/user_agent_header"
@@ -536,12 +647,6 @@
           },
           "400": {
             "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
           }
         }
       }
@@ -549,7 +654,7 @@
     "/options/{ticker}/expiries": {
       "get": {
         "summary": "List all valid option expiries for realtime expiry groups",
-        "description": "Returns all valid option expiration dates for a canonical option-owning ticker over the currently-published horizon: the current Eastern calendar date through current Eastern date + 90 calendar days.\n\nUse the returned `YYYY-MM-DD` dates to build explicit-expiry WebSocket group suffixes by removing dashes, e.g. `2026-07-17` becomes `20260717`. Use canonical option-owning tickers such as `SPX`, `NDX`, `SPY`, `QQQ`, Quant-only stock tickers, or the Quant-only `XSP` index.\n",
+        "description": "Returns all valid option expiration dates for a canonical option-owning ticker over the currently-published horizon: the current Eastern calendar date through current Eastern date + 90 calendar days.\n\nUse the returned `YYYY-MM-DD` dates to build explicit-expiry WebSocket group suffixes. Remove the dashes, e.g. `2026-07-17` becomes `20260717`. Use canonical option-owning tickers such as `SPX`, `NDX`, `SPY`, `QQQ`, Quant-only stock tickers, or the Quant-only `XSP` index.\n",
         "tags": [
           "Quant"
         ],
@@ -572,6 +677,15 @@
         "responses": {
           "200": {
             "description": "All valid option expiries for the ticker within the published horizon.",
+            "headers": {
+              "Cache-Control": {
+                "description": "A cache can keep the response for 12 hours.",
+                "schema": {
+                  "type": "string",
+                  "example": "public, max-age=43200"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -599,6 +713,19 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "description": "Service Unavailable. The upstream options reference data is not available. Retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
           }
         }
       }
@@ -623,23 +750,16 @@
             "name": "ticker",
             "in": "query",
             "required": true,
-            "description": "Cash source ticker. Use a stock or an index ticker.",
+            "description": "Cash source ticker. Use one of the supported pairs: SPX/ES, SPY/ES, NDX/NQ, QQQ/NQ, RUT/RTY, IWM/RTY, DIA/YM, GLD/GC, SLV/SI, USO/CL.",
             "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ticker_stock"
-                },
-                {
-                  "$ref": "#/components/schemas/ticker_index"
-                }
-              ]
+              "$ref": "#/components/schemas/futures_conversion_ticker"
             }
           },
           {
             "name": "future",
             "in": "query",
             "required": true,
-            "description": "Synthetic futures root to convert to.",
+            "description": "Futures root to convert to. It must match the pair of `ticker`.",
             "schema": {
               "$ref": "#/components/schemas/synth_future_ticker"
             }
@@ -684,6 +804,35 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "Not Found. No spot data, no futures bars, no active contract, or fewer than 10 matched minutes for the conversion window.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "No active futures contract found for product."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "description": "Service Unavailable. The upstream futures data did not answer, or a refresh of the same pair is in progress. Retry after a short delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Futures conversion is currently being refreshed. Try again shortly."
+                }
+              }
+            }
           }
         }
       }
@@ -691,7 +840,7 @@
     "/hist/{ticker}/{package}/{category}/{date}": {
       "get": {
         "summary": "Download historical data for a specific ticker, package, category, and date",
-        "description": "Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day look-back window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response containing the URL instead, include the noredirect query parameter. To receive compressed data, set the Accept-Encoding header to gzip.",
+        "description": "Generates a pre-signed URL to download historical data (JSON) for a specific date. Data is available for a 90-day look-back window. By default, this endpoint returns a 302 Redirect to the file. To receive a JSON response that contains the URL instead, include the noredirect query parameter. The file is a gzip JSON file (.json.gz). The download URL is valid for 10 minutes.",
         "tags": [
           "Quant"
         ],
@@ -730,30 +879,6 @@
             "description": "Optional. If included, returns a JSON object with the URL instead of a 302 redirect."
           },
           {
-            "name": "Content-Type",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "application/json"
-              ]
-            },
-            "description": "Set to \"application/json\"."
-          },
-          {
-            "name": "Accept-Encoding",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "gzip"
-              ]
-            },
-            "description": "Optional. Set to \"gzip\" to receive compressed data."
-          },
-          {
             "$ref": "#/components/parameters/user_agent_header"
           },
           {
@@ -762,18 +887,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "OK. Sent when the request has the noredirect query parameter.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "url"
+                  ],
                   "properties": {
                     "url": {
                       "type": "string",
                       "format": "uri",
-                      "description": "The temporary, pre-signed URL to download the requested historical data file."
+                      "description": "The pre-signed URL of the history file. The URL is valid for 10 minutes and grants read access only."
                     }
                   }
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to the pre-signed download URL. Sent when the request has no noredirect query parameter.",
+            "headers": {
+              "Location": {
+                "description": "The pre-signed download URL. Valid for 10 minutes.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
                 }
               }
             }
@@ -786,6 +926,22 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "Not Found. No file exists for the date.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Data not found for date requested."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
           }
         }
       }
@@ -793,7 +949,7 @@
     "/hist/eod/{ticker}": {
       "get": {
         "summary": "Download the latest end-of-day report for a ticker",
-        "description": "Returns a ZIP archive with the most recent end-of-day historical files for the ticker. The archive holds only the packages that your subscription includes.\n\nThe report for the current Eastern date becomes available after 17:00 Eastern time. Before that hour, the endpoint returns the report for the previous date.\n",
+        "description": "Returns a ZIP archive with the most recent end-of-day files that exist for the ticker. The archive holds only the packages that your subscription includes.\n\nThe report for the current Eastern date is eligible from 17:00 Eastern time and is included after the nightly cold-storage export has completed. Until then the endpoint returns the most recent earlier report. The report date is in the Content-Disposition file name.\n",
         "tags": [
           "Classic",
           "State",
@@ -855,7 +1011,20 @@
             "$ref": "#/components/responses/403"
           },
           "404": {
-            "$ref": "#/components/responses/404"
+            "description": "Not Found. No end-of-day report exists for the ticker.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "EOD report not found."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
           },
           "503": {
             "description": "Service Unavailable. The storage fetch failed.",
@@ -873,7 +1042,7 @@
     "/research/{ticker}/{metric}": {
       "get": {
         "summary": "Get research chart data for a ticker and metric",
-        "description": "Returns research chart data for the specified ticker and metric. Supports various output formats, chart types, and filtering options.",
+        "description": "Returns research chart data for the ticker and the metric. The query parameters select the output format, the chart view and the data filters.",
         "security": [
           {
             "bearer_auth": []
@@ -898,7 +1067,17 @@
             "$ref": "#/components/parameters/user_agent_header"
           },
           {
-            "$ref": "#/components/parameters/accept_header"
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "application/json",
+                "text/csv"
+              ]
+            },
+            "description": "Set to \"application/json\", or \"text/csv\" for the csv format."
           },
           {
             "name": "format",
@@ -921,12 +1100,14 @@
             "name": "view",
             "in": "query",
             "required": false,
+            "description": "Chart view. mirror applies to bid_iv, mid_iv and ask_iv (and their iv_* aliases) only. Other metrics fall back to skew.",
             "schema": {
               "type": "string",
               "enum": [
                 "skew",
                 "term",
-                "surface"
+                "surface",
+                "mirror"
               ]
             }
           },
@@ -963,7 +1144,10 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 250,
+              "default": 15
             }
           },
           {
@@ -971,7 +1155,10 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 0
             }
           },
           {
@@ -979,7 +1166,10 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 98
             }
           },
           {
@@ -995,7 +1185,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             }
           },
           {
@@ -1003,7 +1194,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -1011,7 +1203,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -1019,7 +1212,22 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "series",
+            "in": "query",
+            "required": false,
+            "description": "Series for the term view.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "moneyness",
+                "strikes",
+                "deltas"
+              ]
             }
           },
           {
@@ -1045,14 +1253,50 @@
                 "atm",
                 "itm",
                 "ntm",
-                "otm"
+                "otm",
+                "d10",
+                "d15",
+                "d20",
+                "d25"
               ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Research chart data response"
+            "description": "Research chart data response. The png, jpeg, svg, pdf and webp formats return an asset descriptor. The json format returns an array of row objects. The csv format returns text/csv.",
+            "headers": {
+              "Content-Disposition": {
+                "description": "Attachment header for the csv and json formats, with the file name `{ticker}_data.csv` or `{ticker}_data.json`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/research_asset_descriptor"
+                    },
+                    {
+                      "type": "array",
+                      "description": "Row objects for the json format. Each row has the same columns as the csv output.",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  ]
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/400"
@@ -1062,6 +1306,22 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "description": "Internal Server Error. The research service did not answer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Failed to reach upstream research service."
+                }
+              }
+            }
           }
         }
       }
@@ -1069,7 +1329,7 @@
     "/negotiate": {
       "post": {
         "summary": "Negotiate WebSocket connection URLs and initial groups",
-        "description": "Provides real-time, low-latency market data via WebSocket. Send the complete initial set of unprefixed analytics groups and one matching `{ticker}_spot` group for each analytics ticker. The presence of the complete spot-group set selects the V2 hubs. The response returns the authorized `v2_*` hub URLs, and the server auto-joins the requested analytics and spot memberships. Connect to the returned V2 URLs. Do not send client-side `joinGroup` messages for this POST flow.\n\nAnalytics group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Explicit-expiry groups use a `YYYYMMDD` category suffix, for example `SOXL_classic_gex_20260717`, `SOXL_state_gamma_20260717`, or `SOXL_orderflow_20260717`. Use `GET /v2/options/{ticker}/expiries` to discover valid expiry dates.\n\nList each `{ticker}_spot` group once in the POST body. The server places it on every V2 hub that has analytics for that ticker. Analytics and spot are separate groups on the same V2 connections. Spot messages use the `proto.spot` type URL. Correlate analytics and spot by ticker and timestamp without assuming an arrival order.\n\nA POST request with no spot groups remains on the current-generation analytics hubs for compatibility. New custom Quant integrations should use the complete V2 analytics-and-spot flow.\n\nStandard Quant API keys are limited to 150 active hub-and-group memberships by default. Server-expanded spot memberships count toward this limit. Commercial or contracted API keys may have a higher custom group limit.\n",
+        "description": "Provides real-time, low-latency market data via WebSocket. Send the complete initial set of unprefixed analytics groups and one matching `{ticker}_spot` group for each analytics ticker. The presence of the complete spot-group set selects the V2 hubs. The response returns the authorized `v2_*` hub URLs, and the server auto-joins the requested analytics and spot memberships. Connect to the returned V2 URLs. Do not send client-side `joinGroup` messages for this POST flow.\n\nAnalytics group names use `{ticker}_{package}_{category}`, for example `SPX_classic_gex_full`, `SPX_state_gamma_zero`, or `ES_SPX_orderflow_orderflow`. Explicit-expiry groups use a `YYYYMMDD` category suffix, for example `SOXL_classic_gex_20260717`, `SOXL_state_gamma_20260717`, or `SOXL_orderflow_20260717`. Use `GET /options/{ticker}/expiries` to discover valid expiry dates.\n\nList each `{ticker}_spot` group once in the POST body. The server places it on every V2 hub that has analytics for that ticker. Analytics and spot are separate groups on the same V2 connections. Spot messages use the `proto.spot` type URL. Correlate analytics and spot by ticker and timestamp. Do not assume an arrival order.\n\nA POST request with no spot groups remains on the current-generation analytics hubs for compatibility. New custom Quant integrations should use the complete V2 analytics-and-spot flow.\n\nA standard Quant API key has a default limit of 150 active hub-and-group memberships. Server-expanded spot memberships count toward this limit. Commercial or contracted API keys may have a higher custom group limit.\n",
         "tags": [
           "Quant"
         ],
@@ -1128,12 +1388,25 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "description": "Service Unavailable. The server could not read the option expiry universe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
           }
         }
       },
       "patch": {
-        "summary": "Replace active WebSocket group subscriptions without reconnecting",
-        "description": "Replaces the active group memberships for the current API websocket slot without issuing new WebSocket URLs. The request body is the complete desired set of active subscriptions. Any group omitted from the PATCH payload is removed server-side.\n\nEach group entry must include the V2 hub that the client is connected to and the unprefixed group name. The hub must match the analytics group package and category. Repeat each `{ticker}_spot` membership on every V2 hub that has analytics for that ticker. For example, an SPX Classic group uses `v2_classic`, an SPX standard 0DTE State gamma group uses `v2_state_greeks_zero`, and `SPX_spot` must appear on both hubs when both analytics groups remain active.\n\nThe same group limit as POST negotiation applies to the complete PATCH membership set. Standard Quant API keys are limited to 150 active hub-and-group memberships by default. Commercial or contracted API keys may have a higher custom group limit.\n",
+        "summary": "Replace active WebSocket group subscriptions without a reconnect",
+        "description": "Replaces the active group memberships for the current API websocket slot and issues no new WebSocket URLs. The request body is the complete desired membership set. The server removes any membership that the body omits. Each item names the connected hub and the unprefixed group.\n\nEach group entry must include the V2 hub that the client is connected to and the unprefixed group name. The hub must match the analytics group package and category. Repeat each `{ticker}_spot` membership on every V2 hub that has analytics for that ticker. For example, an SPX Classic group uses `v2_classic`, an SPX standard 0DTE State gamma group uses `v2_state_greeks_zero`, and `SPX_spot` must appear on both hubs when both analytics groups remain active.\n\nThe same group limit as POST negotiation applies to the complete PATCH membership set. A standard Quant API key has a default limit of 150 active hub-and-group memberships. Commercial or contracted API keys may have a higher custom group limit.\n",
         "tags": [
           "Quant"
         ],
@@ -1211,13 +1484,29 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "description": "Service Unavailable. The server could not read the option expiry universe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "summary": "Legacy WebSocket negotiation with client-side group joins",
         "deprecated": true,
-        "description": "Compatibility path for clients that manually send Azure Web PubSub `joinGroup` messages after connecting. Custom Quant use is deprecated and should migrate to the V2 POST and PATCH flow. Official Orderflow integrations continue to use this GET compatibility flow.\n",
+        "description": "Compatibility flow for clients that send Azure Web PubSub `joinGroup` messages after they connect. The response carries a Deprecation header. Migrate custom integrations to the POST and PATCH flow. Official Orderflow integrations continue to use this flow.\n",
         "tags": [
           "Quant"
         ],
@@ -1237,6 +1526,22 @@
         "responses": {
           "200": {
             "description": "Legacy WebSocket connection URLs and group prefix.",
+            "headers": {
+              "Deprecation": {
+                "description": "Always true. The GET flow is deprecated.",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              },
+              "Warning": {
+                "description": "A 299 warning that names the POST replacement.",
+                "schema": {
+                  "type": "string",
+                  "example": "299 - \"GET /v2/negotiate will be deprecated soon; use POST with groups\""
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1253,6 +1558,9 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
           }
         }
       }
@@ -1260,10 +1568,6 @@
   },
   "components": {
     "schemas": {
-      "_float": {
-        "type": "number",
-        "format": "float"
-      },
       "_double": {
         "type": "number",
         "format": "double"
@@ -1271,29 +1575,9 @@
       "_int": {
         "type": "integer"
       },
-      "_int32": {
-        "type": "integer",
-        "format": "int32"
-      },
       "_int64": {
         "type": "integer",
-        "format": "int32"
-      },
-      "_string": {
-        "type": "string"
-      },
-      "level": {
-        "type": "string",
-        "enum": [
-          "ORDERFLOW",
-          "CLASSIC",
-          "STATE"
-        ]
-      },
-      "agg": {
-        "enum": [
-          "day"
-        ]
+        "format": "int64"
       },
       "ticker": {
         "oneOf": [
@@ -1444,7 +1728,7 @@
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
-            "description": "All valid option expiries in YYYY-MM-DD format within the published horizon."
+            "description": "All valid option expiries in YYYY-MM-DD format within the published horizon. The dates are distinct and in ascending order. The horizon includes start_date and end_date."
           }
         }
       },
@@ -1459,6 +1743,22 @@
           "GC",
           "SI",
           "CL"
+        ]
+      },
+      "futures_conversion_ticker": {
+        "type": "string",
+        "description": "Cash source ticker of a supported futures conversion pair.",
+        "enum": [
+          "SPX",
+          "SPY",
+          "NDX",
+          "QQQ",
+          "RUT",
+          "IWM",
+          "DIA",
+          "GLD",
+          "SLV",
+          "USO"
         ]
       },
       "futures_conversion_model": {
@@ -1496,15 +1796,12 @@
       },
       "ticker_variant": {
         "type": "string",
-        "minLength": 4,
+        "minLength": 6,
         "maxLength": 6,
+        "description": "Synthetic futures tickers. ES_SPX is SPX converted to ES; NQ_NDX is NDX converted to NQ.",
         "enum": [
           "ES_SPX",
-          "NDXP",
-          "NQ_NDX",
-          "RUTW",
-          "SPXW",
-          "VIXW"
+          "NQ_NDX"
         ]
       },
       "ticker_index": {
@@ -1564,6 +1861,7 @@
           "SNDK",
           "SNOW",
           "SOFI",
+          "SPCX",
           "SPY",
           "TLT",
           "TQQQ",
@@ -1585,22 +1883,22 @@
             "$ref": "#/components/schemas/zero_gamma"
           },
           "mpos_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "mpos_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "mneg_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "mneg_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "net_gex_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "net_gex_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "timestamp": {
             "$ref": "#/components/schemas/timestamp"
@@ -1615,6 +1913,16 @@
       },
       "maxchange_response": {
         "type": "object",
+        "required": [
+          "timestamp",
+          "ticker",
+          "current",
+          "one",
+          "five",
+          "ten",
+          "fifteen",
+          "thirty"
+        ],
         "properties": {
           "timestamp": {
             "$ref": "#/components/schemas/timestamp"
@@ -1626,7 +1934,7 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
@@ -1635,7 +1943,7 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
@@ -1644,7 +1952,7 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
@@ -1653,7 +1961,7 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
@@ -1662,7 +1970,7 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
@@ -1671,20 +1979,12 @@
             "type": "array",
             "items": {
               "type": "number",
-              "format": "float"
+              "format": "double"
             },
             "minItems": 2,
             "maxItems": 2
           }
         }
-      },
-      "filter": {
-        "type": "string",
-        "enum": [
-          "majors",
-          "maxchange"
-        ],
-        "description": "Filter: * `majors` - filter to majors only * `maxchange` - filter to max change only\n"
       },
       "category_state": {
         "type": "string",
@@ -1706,7 +2006,7 @@
           "vanna_one",
           "vanna_zero"
         ],
-        "description": "Type: * `delta` or `delta_zero` - The delta * `gamma` or `gamma_zero` - The gamma (long/short) * `vanna` or `vanna_zero` - The vanna * `charm` or `charm_zero`-  The charm * `onedelta` or `delta_one` - 1dte delta * `onegamma` or `gamma_one` - 1dte gamma (long/short) * `onevanna` or `vanna_one` - 1dte vanna * `onecharm` or `charm_one`- 1dte charm\n"
+        "description": "Type: * `delta` or `delta_zero` - 0dte delta * `gamma` or `gamma_zero` - 0dte gamma (long/short) * `vanna` or `vanna_zero` - 0dte vanna * `charm` or `charm_zero` - 0dte charm * `onedelta` or `delta_one` - 1dte delta * `onegamma` or `gamma_one` - 1dte gamma (long/short) * `onevanna` or `vanna_one` - 1dte vanna * `onecharm` or `charm_one` - 1dte charm\n"
       },
       "basic_response": {
         "type": "object",
@@ -1718,40 +2018,40 @@
             "$ref": "#/components/schemas/ticker"
           },
           "min_dte": {
-            "$ref": "#/components/schemas/_int"
+            "$ref": "#/components/schemas/min_dte"
           },
           "sec_min_dte": {
-            "$ref": "#/components/schemas/_int"
+            "$ref": "#/components/schemas/sec_min_dte"
           },
           "spot": {
-            "$ref": "#/components/schemas/_double"
+            "$ref": "#/components/schemas/spot"
           },
           "zero_gamma": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/zero_gamma"
           },
           "major_pos_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/major_pos_vol"
           },
           "major_pos_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/major_pos_oi"
           },
           "major_neg_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/major_neg_vol"
           },
           "major_neg_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/major_neg_oi"
           },
           "strikes": {
             "$ref": "#/components/schemas/strikes"
           },
           "sum_gex_vol": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/sum_gex_vol"
           },
           "sum_gex_oi": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/sum_gex_oi"
           },
           "delta_risk_reversal": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/delta_risk_reversal"
           },
           "max_priors": {
             "$ref": "#/components/schemas/max_priors"
@@ -1769,7 +2069,7 @@
             "$ref": "#/components/schemas/ticker"
           },
           "spot": {
-            "$ref": "#/components/schemas/_double"
+            "$ref": "#/components/schemas/spot"
           },
           "min_dte": {
             "$ref": "#/components/schemas/_int"
@@ -1778,10 +2078,10 @@
             "$ref": "#/components/schemas/_int"
           },
           "major_positive": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "major_negative": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "major_long_gamma": {
             "$ref": "#/components/schemas/major_long_gamma"
@@ -1803,109 +2103,109 @@
             "$ref": "#/components/schemas/ticker"
           },
           "spot": {
-            "$ref": "#/components/schemas/_double"
+            "$ref": "#/components/schemas/spot"
           },
           "z_mlgamma": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "z_msgamma": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "o_mlgamma": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "o_msgamma": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zero_mcall": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zero_mput": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_mcall": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_mput": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zcvr": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "ocvr": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zgr": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "ogr": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zvanna": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "ovanna": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "zcharm": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "ocharm": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "agg_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_agg_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "agg_call_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_agg_call_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "agg_put_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_agg_put_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "net_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_net_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "net_call_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_net_call_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "net_put_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_net_put_dex": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "dexoflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "gexoflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "cvroflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_dexoflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_gexoflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           },
           "one_cvroflow": {
-            "$ref": "#/components/schemas/_float"
+            "$ref": "#/components/schemas/_double"
           }
         },
         "type": "object"
@@ -1925,9 +2225,9 @@
       "research_ticker": {
         "type": "string",
         "minLength": 1,
-        "maxLength": 10,
-        "pattern": "^[a-zA-Z0-9_^.]+$",
-        "description": "Ticker symbol for research data. Accepts any valid ticker string including stocks, indexes, futures, and variants."
+        "maxLength": 6,
+        "pattern": "^[a-zA-Z]{1,6}$",
+        "description": "Ticker symbol for research data. One to six letters. The value is not case-sensitive."
       },
       "research_metric": {
         "type": "string",
@@ -1937,6 +2237,7 @@
           "delta_ask",
           "gamma_ask",
           "iv_ask",
+          "ask_iv",
           "rho_ask",
           "speed_ask",
           "theta_ask",
@@ -1950,6 +2251,7 @@
           "delta_bid",
           "gamma_bid",
           "iv_bid",
+          "bid_iv",
           "rho_bid",
           "speed_bid",
           "theta_bid",
@@ -1976,6 +2278,7 @@
           "dex_oi_skew_adj",
           "dex_vol",
           "dex_vol_skew_adj",
+          "gamma_wall",
           "gamma_wall_abs",
           "gex_both",
           "gex_both_skew_adj",
@@ -1983,14 +2286,16 @@
           "gex_oi_skew_adj",
           "gex_vol",
           "gex_vol_skew_adj",
+          "intrinsic",
           "intrinsic_value",
-          "last_price",
+          "extrinsic",
           "max_pain",
           "charm_mid",
           "color_mid",
           "delta_mid",
           "gamma_mid",
           "iv_mid",
+          "mid_iv",
           "rho_mid",
           "speed_mid",
           "theta_mid",
@@ -2010,6 +2315,7 @@
           "rho_ex_oi_skew_adj",
           "rho_ex_vol",
           "rho_ex_vol_skew_adj",
+          "skew",
           "speed_ex_both",
           "speed_ex_both_skew_adj",
           "speed_ex_oi",
@@ -2041,7 +2347,7 @@
           "vex_oi_skew_adj",
           "vex_vol",
           "vex_vol_skew_adj",
-          "volatility_trigger",
+          "vol_trigger",
           "volume",
           "vomma_ex_both",
           "vomma_ex_both_skew_adj",
@@ -2058,14 +2364,47 @@
         ],
         "description": "Research metric identifier for chart data generation."
       },
+      "research_asset_descriptor": {
+        "type": "object",
+        "description": "Descriptor of a rendered chart asset. The png, jpeg, svg, pdf and webp formats return this descriptor.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Relative path of the rendered asset."
+          },
+          "name": {
+            "type": "string",
+            "description": "File name of the rendered asset."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "Media type of the rendered asset."
+          },
+          "description": {
+            "type": "string",
+            "description": "Text description of the chart."
+          },
+          "time_stamp": {
+            "type": "string",
+            "description": "Render time in the format YYYYMMDDTHHMMSS."
+          },
+          "model_ts": {
+            "type": "string",
+            "nullable": true,
+            "description": "ISO-8601 timestamp of the options-chain snapshot that the chart used."
+          },
+          "model": {
+            "type": "string",
+            "description": "Volatility model of the request. Default gbR."
+          }
+        }
+      },
       "data_category": {
         "type": "string",
         "enum": [
           "gex_full",
           "gex_zero",
           "gex_one",
-          "volume_zero",
-          "volume_one",
           "delta_zero",
           "delta_one",
           "gamma_zero",
@@ -2076,7 +2415,7 @@
           "charm_one",
           "orderflow"
         ],
-        "description": "Data category name."
+        "description": "Data category name that the REST API and WebSocket hubs serve. The categories endpoint returns these names."
       },
       "category_orderflow": {
         "type": "string",
@@ -2106,7 +2445,7 @@
       "websocket_group_name": {
         "type": "string",
         "example": "SPX_state_gamma_zero",
-        "description": "Unprefixed analytics group name in `{ticker}_{package}_{category}` format, or an unprefixed spot group name in `{ticker}_spot` format. Standard analytics categories include `gex_full`, `gex_zero`, `gex_one`, `delta_zero`, `gamma_zero`, `vanna_zero`, `charm_zero`, `delta_one`, `gamma_one`, `vanna_one`, `charm_one`, and `orderflow`.\n\nExplicit-expiry analytics groups use a `YYYYMMDD` category suffix discovered from `GET /v2/options/{ticker}/expiries`, for example `SPX_classic_gex_20260717`, `SPX_state_gex_20260717`, `SPX_state_gamma_20260717`, and `SPX_orderflow_20260717`.\n\nA V2 request must include one matching `{ticker}_spot` group for each analytics ticker. List each spot group once in a POST body. Repeat it for each applicable V2 hub in a PATCH body.\n"
+        "description": "Unprefixed analytics group name in `{ticker}_{package}_{category}` format, or an unprefixed spot group name in `{ticker}_spot` format. Standard analytics categories include `gex_full`, `gex_zero`, `gex_one`, `delta_zero`, `gamma_zero`, `vanna_zero`, `charm_zero`, `delta_one`, `gamma_one`, `vanna_one`, `charm_one`, and `orderflow`.\n\nExplicit-expiry analytics groups use a `YYYYMMDD` category suffix discovered from `GET /options/{ticker}/expiries`, for example `SPX_classic_gex_20260717`, `SPX_state_gex_20260717`, `SPX_state_gamma_20260717`, and `SPX_orderflow_20260717`. The date must be a listed expiry for the ticker. Synthetic futures tickers, such as ES_SPX and NQ_NDX, have no explicit-expiry groups.\n\nA V2 request must include one matching `{ticker}_spot` group for each analytics ticker. List each spot group once in a POST body. Repeat it for each applicable V2 hub in a PATCH body.\n"
       },
       "websocket_v2_urls": {
         "type": "object",
@@ -2262,7 +2601,7 @@
             "items": {
               "$ref": "#/components/schemas/websocket_group_update_item"
             },
-            "description": "Complete desired hub-and-group membership set. Omitted memberships are removed. New custom Quant clients should send V2 hubs and colocated spot memberships."
+            "description": "Complete desired hub-and-group membership set. The server removes memberships that the body omits. New custom Quant clients should send V2 hubs and colocated spot memberships."
           }
         },
         "example": {
@@ -2312,7 +2651,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Count of active group memberships by V2 hub after replacement."
+            "description": "Count of active group memberships by hub after replacement."
           }
         },
         "example": {
@@ -2339,7 +2678,7 @@
           },
           "prefix": {
             "type": "string",
-            "description": "Legacy prefix to prepend to group names when sending `joinGroup` messages."
+            "description": "Legacy prefix for the group name in a `joinGroup` message."
           }
         },
         "example": {
@@ -2355,8 +2694,7 @@
         }
       },
       "timestamp": {
-        "type": "integer",
-        "format": "int64"
+        "$ref": "#/components/schemas/_int64"
       },
       "error_response": {
         "type": "object",
@@ -2373,166 +2711,85 @@
         "$ref": "#/components/schemas/_int"
       },
       "spot": {
-        "$ref": "#/components/schemas/_double"
+        "type": "number",
+        "format": "double",
+        "nullable": true,
+        "description": "Spot price. Null when spot data is not available to the caller."
       },
       "zero_gamma": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_pos_vol": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_long_gamma": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_short_gamma": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_pos_oi": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_neg_vol": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "major_neg_oi": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "mini_contracts": {
         "type": "array",
-        "description": "Strike rows. Each row is [strike, call_ivol, put_ivol, greek value, priors array, put classified volume, put volume priors]. The put volume entries return null in public API responses.",
+        "description": "Strike rows. Each row is [strike, call_ivol, put_ivol, greek value, priors array, put classified volume, put volume priors]. In public API responses the put classified volume is 0 and the put volume priors are null.",
         "items": {
           "type": "array"
         }
       },
       "strikes": {
         "type": "array",
+        "description": "Strike rows. Each row is [strike, gex_vol, gex_oi, priors]. priors holds the 1, 5, 10, 15 and 30 minute lookback GEX values.",
         "items": {
           "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
           "items": {
-            "type": "number",
-            "format": "float"
+            "oneOf": [
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            ]
           }
         }
       },
       "sum_gex_vol": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "sum_gex_oi": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "delta_risk_reversal": {
-        "$ref": "#/components/schemas/_float"
+        "$ref": "#/components/schemas/_double"
       },
       "max_priors": {
         "type": "array",
+        "description": "Six [strike, gex] pairs. Entry 0 is the current pair. Entries 1 to 5 are the 1, 5, 10, 15 and 30 minute lookbacks. The array is empty when the producer omits the field.",
+        "maxItems": 6,
         "items": {
           "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
           "items": {
             "type": "number",
-            "format": "float"
+            "format": "double"
           }
         }
-      },
-      "z_mlgamma": {
-        "type": "integer"
-      },
-      "z_msgamma": {
-        "type": "integer"
-      },
-      "o_mlgamma": {
-        "type": "integer"
-      },
-      "o_msgamma": {
-        "type": "integer"
-      },
-      "zero_mcall": {
-        "type": "integer"
-      },
-      "zero_mput": {
-        "type": "integer"
-      },
-      "one_mcall": {
-        "type": "integer"
-      },
-      "one_mput": {
-        "type": "integer"
-      },
-      "zcvr": {
-        "type": "integer"
-      },
-      "ocvr": {
-        "type": "integer"
-      },
-      "zgr": {
-        "type": "integer"
-      },
-      "ogr": {
-        "type": "integer"
-      },
-      "zvanna": {
-        "type": "integer"
-      },
-      "ovanna": {
-        "type": "integer"
-      },
-      "zcharm": {
-        "type": "integer"
-      },
-      "ocharm": {
-        "type": "integer"
-      },
-      "agg_dex": {
-        "type": "integer"
-      },
-      "one_agg_dex": {
-        "type": "integer"
-      },
-      "agg_call_dex": {
-        "type": "integer"
-      },
-      "one_agg_call_dex": {
-        "type": "integer"
-      },
-      "agg_put_dex": {
-        "type": "integer"
-      },
-      "one_agg_put_dex": {
-        "type": "integer"
-      },
-      "net_dex": {
-        "type": "integer"
-      },
-      "one_net_dex": {
-        "type": "integer"
-      },
-      "net_call_dex": {
-        "type": "integer"
-      },
-      "one_net_call_dex": {
-        "type": "integer"
-      },
-      "net_put_dex": {
-        "type": "integer"
-      },
-      "one_net_put_dex": {
-        "type": "integer"
-      },
-      "dexoflow": {
-        "type": "integer"
-      },
-      "gexoflow": {
-        "type": "integer"
-      },
-      "cvroflow": {
-        "type": "integer"
-      },
-      "one_dexoflow": {
-        "type": "integer"
-      },
-      "one_gexoflow": {
-        "type": "integer"
-      },
-      "one_cvroflow": {
-        "type": "integer"
       }
     },
     "parameters": {
@@ -2633,22 +2890,6 @@
           "description": "Data package type:\n* `classic` - Classic subscription data\n* `state` - State subscription data\n* `orderflow` - Orderflow subscription data\n"
         }
       },
-      "sub_type_in_path": {
-        "name": "subtype",
-        "in": "path",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "enum": [
-            "gex_full",
-            "full",
-            "gex_zero",
-            "zero",
-            "gex_one",
-            "one"
-          ]
-        }
-      },
       "user_agent_header": {
         "name": "User-Agent",
         "in": "header",
@@ -2678,32 +2919,8 @@
       }
     },
     "responses": {
-      "200": {
-        "description": "OK"
-      },
-      "200_Message": {
-        "description": "OK",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "202": {
-        "description": "Accepted"
-      },
-      "201": {
-        "description": "Created"
-      },
       "401": {
-        "description": "Unauthorized. User is not authenticated.",
+        "description": "Unauthorized. The API key is missing, unknown, expired or revoked. The body can be empty.",
         "content": {
           "application/json": {
             "schema": {
@@ -2713,7 +2930,7 @@
         }
       },
       "403": {
-        "description": "Forbidden. User does not have access to the resource.",
+        "description": "Forbidden. The key, the subscription level or the client is not permitted. The body can be empty.",
         "content": {
           "application/json": {
             "schema": {
@@ -2742,36 +2959,43 @@
           }
         }
       },
-      "400_Message": {
-        "description": "Bad Request",
+      "409": {
+        "description": "Conflict. The caller has no live connection on a hub that the request names. Negotiate with POST and connect first.",
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/components/schemas/error_response"
+            },
+            "example": {
+              "error": "No active websocket connection for: <hubs>. Negotiate with POST and connect to the returned hub urls before updating groups."
             }
           }
         }
       },
-      "409": {
-        "description": "Conflict"
-      }
-    },
-    "headers": {
-      "Accept": {
-        "description": "Content type accepted by the client",
-        "required": true,
-        "schema": {
-          "enum": [
-            "application/json",
-            "application/octet-stream"
-          ],
-          "default": "application/json",
-          "example": "application/json"
+      "429": {
+        "description": "Rate limit exceeded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            },
+            "example": {
+              "error": "Rate limit exceeded."
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error. The server could not read the chart data.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            },
+            "example": {
+              "error": "Failed to get chart data."
+            }
+          }
         }
       }
     }
@@ -2784,7 +3008,7 @@
   "tags": [
     {
       "name": "Public",
-      "description": "Endpoints that do not require authentication, such as listing available tickers and downloading historical data."
+      "description": "Endpoints that need no API key, such as the ticker lists and the category list."
     },
     {
       "name": "Classic",
