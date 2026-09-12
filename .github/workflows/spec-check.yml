@@ -1,0 +1,64 @@
+name: Check spec
+
+# This repository is public, so this workflow stays self-contained: it reads
+# nothing from the private template repository and needs no secret. The
+# companion check that proves the private template still derives these files
+# runs in nfa-api-openapi-spec, where the build log is private.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "latest/**"
+      - "README.md"
+      - "AGENTS.md"
+      - "scripts/spec-version.py"
+      - ".github/workflows/spec-check.yml"
+  pull_request:
+    paths:
+      - "latest/**"
+      - "README.md"
+      - "AGENTS.md"
+      - "scripts/spec-version.py"
+      - ".github/workflows/spec-check.yml"
+  workflow_dispatch:
+
+concurrency:
+  # Cancel a superseded pull-request run. Never cancel a run on master.
+  group: spec-check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate the published spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - run: pip install pyyaml
+
+      # Proves info.version agrees in all four files, and that the JSON twin is
+      # a current conversion of the YAML. It names the repair command on failure.
+      - name: Version agrees in every file
+        run: python scripts/spec-version.py --check
+
+      - uses: actions/setup-node@v6
+
+      - name: Install swagger-cli
+        run: npm install -g @apidevtools/swagger-cli
+
+      # Validate both published files. The YAML is what most consumers download,
+      # and its parser rejects defects that a conversion to JSON hides, such as
+      # a duplicated mapping key.
+      - name: Validate the published YAML
+        run: swagger-cli validate latest/gexbot.spec3.yaml
+
+      - name: Validate the published JSON
+        run: swagger-cli validate latest/gexbot.spec3.json
