@@ -190,7 +190,7 @@ The example shows four strike rows. A live response returns every strike.
 
 ```http request
 GET /research/SPX/gex_both
-Authorization: Bearer <your-gbR-api-key>
+Authorization: Bearer research_<your-gbR-api-key-secret>
 User-Agent: my-app/1.0
 Accept: application/json
 ```
