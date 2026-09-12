@@ -1,9 +1,16 @@
-﻿openapi: 3.0.1
+# Generated file. Do not edit.
+#
+# Source: nfa-llc/nfa-api-openapi-spec, specs/public.yaml
+# Rebuild: python scripts/build-public-spec.py --write <this directory>
+#
+# An operation marked `x-public: false` in the source is held back from this
+# file. A hand edit here is overwritten by the next build.
+openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.0
-  termsOfService: "https://www.gexbot.com/terms-and-conditions"
+  version: 2.5.1
+  termsOfService: https://www.gexbot.com/terms-and-conditions
 servers:
   - url: https://api.gex.bot/v2
     description: Primary v2 API server
@@ -13,7 +20,7 @@ paths:
       summary: Get chart data for a ticker and category
       description: Returns the classic GEX chain for a ticker and category. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/classic_category_in_path"
@@ -46,7 +53,7 @@ paths:
       summary: Get state data for a ticker and category
       description: Returns the state data for a ticker and category. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/state_category_in_path"
@@ -80,7 +87,7 @@ paths:
       summary: Get orderflow data for a ticker
       description: Returns the latest orderflow snapshot for the ticker. All parameters are enumerated. Send the gexbot API key in the Authorization header with the Bearer scheme.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/orderflow_category_in_path"
@@ -108,17 +115,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
               example:
-                error: "Failed to get redis chart data: null or zero length"
+                error: 'Failed to get redis chart data: null or zero length'
       tags:
         - Orderflow
         - Quant
-
   /{ticker}/classic/{category}/maxchange:
     get:
       summary: Get max change data for a ticker and category
       description: Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker and category.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/gex_category_in_path"
@@ -165,7 +171,7 @@ paths:
       summary: Get max change data for a ticker and category
       description: Returns the strikes with the most significant GEX change over various look-back periods for the specified ticker and category.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/gex_category_in_path"
@@ -211,7 +217,7 @@ paths:
       summary: Get majors data for a ticker and category
       description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker and category.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/gex_category_in_path"
@@ -244,7 +250,7 @@ paths:
       summary: Get majors data for a ticker and category
       description: Returns the key GEX levels (Zero Gamma, Major Positive/Negative GEX by OI and Volume) for the specified ticker and category.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/gex_category_in_path"
@@ -274,15 +280,15 @@ paths:
   /tickers:
     get:
       summary: List all available ticker symbols
-      description: "Returns the ticker symbols that the API supports, in three lists: stocks, indexes, and futures."
+      description: 'Returns the ticker symbols that the API supports, in three lists: stocks, indexes, and futures.'
       tags:
         - Public
-      security: [ ]
+      security: []
       parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -304,27 +310,27 @@ paths:
                     items:
                       type: string
                     description: Array of futures ticker symbols.
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
           description: Forbidden. The client User-Agent is blocked.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error_response'
+                $ref: "#/components/schemas/error_response"
   /{package}/categories:
     get:
       summary: List data categories for a package
       description: Returns the data category names for a package. Use these names in REST requests and WebSocket groups.
       tags:
         - Public
-      security: [ ]
+      security: []
       parameters:
         - $ref: "#/components/parameters/package_in_path"
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: Data category names for the requested package. classic returns gex_full, gex_zero and gex_one. orderflow returns orderflow.
           content:
             application/json:
@@ -344,15 +350,15 @@ paths:
                 - vanna_one
                 - charm_zero
                 - charm_one
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
           description: Forbidden. The client User-Agent is blocked.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error_response'
-        '404':
+                $ref: "#/components/schemas/error_response"
+        "404":
           description: Not Found. The package is not classic, state or orderflow.
   /tickers/quant:
     get:
@@ -361,12 +367,12 @@ paths:
         Returns the additional stock and index ticker symbols that the realtime WebSocket feed publishes for Quant subscribers. The route needs no API key. The /v2 form still requires the User-Agent header. These tickers are WebSocket/PubSub-only: they publish standard realtime groups and explicit-expiry realtime groups. They are not valid on the REST chart or history routes. Only a Quant subscription can subscribe to these tickers.
       tags:
         - Public
-      security: [ ]
+      security: []
       parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: Quant ticker symbols.
           content:
             application/json:
@@ -379,8 +385,8 @@ paths:
                   - FUTU
                 indexes:
                   - XSP
-        '400':
-          $ref: '#/components/responses/400'
+        "400":
+          $ref: "#/components/responses/400"
   /options/{ticker}/expiries:
     get:
       summary: List all valid option expiries for realtime expiry groups
@@ -391,42 +397,42 @@ paths:
       tags:
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/option_ticker_in_path"
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: All valid option expiries for the ticker within the published horizon.
           headers:
             Cache-Control:
               description: A cache can keep the response for 12 hours.
               schema:
                 type: string
-                example: "public, max-age=43200"
+                example: public, max-age=43200
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/option_expiries_response"
               example:
                 ticker: SPX
-                start_date: "2026-07-10"
-                end_date: "2026-10-08"
+                start_date: '2026-07-10'
+                end_date: '2026-10-08'
                 expiries:
-                  - "2026-07-10"
-                  - "2026-07-13"
-                  - "2026-07-15"
-                  - "2026-07-17"
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '429':
-          $ref: '#/components/responses/429'
-        '503':
+                  - '2026-07-10'
+                  - '2026-07-13'
+                  - '2026-07-15'
+                  - '2026-07-17'
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "429":
+          $ref: "#/components/responses/429"
+        "503":
           description: Service Unavailable. The upstream options reference data is not available. Retry later.
           content:
             application/json:
@@ -445,12 +451,12 @@ paths:
         - Orderflow
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - name: ticker
           in: query
           required: true
-          description: "Cash source ticker. Use one of the supported pairs: SPX/ES, SPY/ES, NDX/NQ, QQQ/NQ, RUT/RTY, IWM/RTY, DIA/YM, GLD/GC, SLV/SI, USO/CL."
+          description: 'Cash source ticker. Use one of the supported pairs: SPX/ES, SPY/ES, NDX/NQ, QQQ/NQ, RUT/RTY, IWM/RTY, DIA/YM, GLD/GC, SLV/SI, USO/CL.'
           schema:
             $ref: "#/components/schemas/futures_conversion_ticker"
         - name: future
@@ -468,7 +474,7 @@ paths:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: The futures conversion terms.
           content:
             application/json:
@@ -478,13 +484,13 @@ paths:
                 future_contract: ESH6
                 multiplier: 1
                 additive: 34.25
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
           description: Not Found. No spot data, no futures bars, no active contract, or fewer than 10 matched minutes for the conversion window.
           content:
             application/json:
@@ -492,9 +498,9 @@ paths:
                 $ref: "#/components/schemas/error_response"
               example:
                 error: No active futures contract found for product.
-        '429':
-          $ref: '#/components/responses/429'
-        '503':
+        "429":
+          $ref: "#/components/responses/429"
+        "503":
           description: Service Unavailable. The upstream futures data did not answer, or a refresh of the same pair is in progress. Retry after a short delay.
           content:
             application/json:
@@ -509,7 +515,7 @@ paths:
       tags:
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/package_in_path"
@@ -519,7 +525,7 @@ paths:
           required: true
           schema:
             type: string
-            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+            pattern: ^\d{4}-\d{2}-\d{2}$
           description: The date to query in YYYY-MM-DD format.
         - name: noredirect
           in: query
@@ -530,7 +536,7 @@ paths:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: OK. Sent when the request has the noredirect query parameter.
           content:
             application/json:
@@ -543,7 +549,7 @@ paths:
                     type: string
                     format: uri
                     description: The pre-signed URL of the history file. The URL is valid for 10 minutes and grants read access only.
-        '302':
+        "302":
           description: Redirect to the pre-signed download URL. Sent when the request has no noredirect query parameter.
           headers:
             Location:
@@ -551,13 +557,13 @@ paths:
               schema:
                 type: string
                 format: uri
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
           description: Not Found. No file exists for the date.
           content:
             application/json:
@@ -565,8 +571,8 @@ paths:
                 $ref: "#/components/schemas/error_response"
               example:
                 error: Data not found for date requested.
-        '429':
-          $ref: '#/components/responses/429'
+        "429":
+          $ref: "#/components/responses/429"
   /hist/eod/{ticker}:
     get:
       summary: Download the latest end-of-day report for a ticker
@@ -580,7 +586,7 @@ paths:
         - Orderflow
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/ticker_in_path"
         - $ref: "#/components/parameters/user_agent_header"
@@ -589,10 +595,11 @@ paths:
           required: false
           schema:
             type: string
-            enum: [ application/zip ]
+            enum:
+              - application/zip
           description: Optional. Set to "application/zip".
       responses:
-        '200':
+        "200":
           description: The end-of-day ZIP report.
           headers:
             Content-Disposition:
@@ -604,13 +611,13 @@ paths:
               schema:
                 type: string
                 format: binary
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
           description: Not Found. No end-of-day report exists for the ticker.
           content:
             application/json:
@@ -618,9 +625,9 @@ paths:
                 $ref: "#/components/schemas/error_response"
               example:
                 error: EOD report not found.
-        '429':
-          $ref: '#/components/responses/429'
-        '503':
+        "429":
+          $ref: "#/components/responses/429"
+        "503":
           description: Service Unavailable. The storage fetch failed.
           content:
             application/json:
@@ -631,7 +638,7 @@ paths:
       summary: Get research chart data for a ticker and metric
       description: Returns research chart data for the ticker and the metric. The query parameters select the output format, the chart view and the data filters.
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       tags:
         - Research
       parameters:
@@ -647,7 +654,9 @@ paths:
           required: true
           schema:
             type: string
-            enum: [ application/json, text/csv ]
+            enum:
+              - application/json
+              - text/csv
           description: Set to "application/json", or "text/csv" for the csv format.
         - name: format
           in: query
@@ -816,7 +825,6 @@ paths:
                 $ref: "#/components/schemas/error_response"
               example:
                 error: Failed to reach upstream research service.
-
   /negotiate:
     post:
       summary: Negotiate WebSocket connection URLs and initial groups
@@ -833,7 +841,7 @@ paths:
       tags:
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
@@ -853,21 +861,21 @@ paths:
                     - ES_SPX_orderflow_orderflow
                     - ES_SPX_spot
       responses:
-        '200':
+        "200":
           description: Authorized V2 hub URLs for the documented analytics-and-spot flow, or current-generation hub URLs for a compatibility request with no spot groups.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/websocket_negotiate_response"
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '429':
-          $ref: '#/components/responses/429'
-        '503':
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "429":
+          $ref: "#/components/responses/429"
+        "503":
           description: Service Unavailable. The server could not read the option expiry universe.
           content:
             application/json:
@@ -884,7 +892,7 @@ paths:
       tags:
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
@@ -911,23 +919,23 @@ paths:
                     - hub: v2_orderflow
                       group: ES_SPX_spot
       responses:
-        '200':
+        "200":
           description: Active websocket group memberships replaced.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/websocket_group_update_response"
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '409':
-          $ref: '#/components/responses/409'
-        '429':
-          $ref: '#/components/responses/429'
-        '503':
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "409":
+          $ref: "#/components/responses/409"
+        "429":
+          $ref: "#/components/responses/429"
+        "503":
           description: Service Unavailable. The server could not read the option expiry universe.
           content:
             application/json:
@@ -941,12 +949,12 @@ paths:
       tags:
         - Quant
       security:
-        - bearer_auth: [ ]
+        - bearer_auth: []
       parameters:
         - $ref: "#/components/parameters/user_agent_header"
         - $ref: "#/components/parameters/accept_header"
       responses:
-        '200':
+        "200":
           description: Legacy WebSocket connection URLs and group prefix.
           headers:
             Deprecation:
@@ -958,19 +966,19 @@ paths:
               description: A 299 warning that names the POST replacement.
               schema:
                 type: string
-                example: '299 - "GET /v2/negotiate will be deprecated soon; use POST with groups"'
+                example: 299 - "GET /v2/negotiate will be deprecated soon; use POST with groups"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/websocket_legacy_negotiate_response"
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '429':
-          $ref: '#/components/responses/429'
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "429":
+          $ref: "#/components/responses/429"
 components:
   schemas:
     _double:
@@ -1085,17 +1093,17 @@ components:
           description: Canonical ticker used for the expiry lookup.
         start_date:
           type: string
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          pattern: ^\d{4}-\d{2}-\d{2}$
           description: Start of the published expiry horizon in YYYY-MM-DD format.
         end_date:
           type: string
-          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          pattern: ^\d{4}-\d{2}-\d{2}$
           description: End of the published expiry horizon in YYYY-MM-DD format.
         expiries:
           type: array
           items:
             type: string
-            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+            pattern: ^\d{4}-\d{2}-\d{2}$
           description: All valid option expiries in YYYY-MM-DD format within the published horizon. The dates are distinct and in ascending order. The horizon includes start_date and end_date.
     synth_future_ticker:
       type: string
@@ -1223,30 +1231,29 @@ components:
         - UVXY
         - VALE
         - ZS
-
     majors_response:
       type: object
       properties:
         zero_gamma:
-          $ref: '#/components/schemas/zero_gamma'
+          $ref: "#/components/schemas/zero_gamma"
         mpos_vol:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         mpos_oi:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         mneg_vol:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         mneg_oi:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         net_gex_vol:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         net_gex_oi:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         timestamp:
-          $ref: '#/components/schemas/timestamp'
+          $ref: "#/components/schemas/timestamp"
         ticker:
-          $ref: '#/components/schemas/ticker'
+          $ref: "#/components/schemas/ticker"
         spot:
-          $ref: '#/components/schemas/spot'
+          $ref: "#/components/schemas/spot"
     maxchange_response:
       type: object
       required:
@@ -1260,9 +1267,9 @@ components:
         - thirty
       properties:
         timestamp:
-          $ref: '#/components/schemas/timestamp'
+          $ref: "#/components/schemas/timestamp"
         ticker:
-          $ref: '#/components/schemas/ticker'
+          $ref: "#/components/schemas/ticker"
         current:
           type: array
           items:
@@ -1324,153 +1331,142 @@ components:
         - vanna
         - vanna_one
         - vanna_zero
-      description: >
-        Type:
-        * `delta` or `delta_zero` - 0dte delta
-        * `gamma` or `gamma_zero` - 0dte gamma (long/short)
-        * `vanna` or `vanna_zero` - 0dte vanna
-        * `charm` or `charm_zero` - 0dte charm
-        * `onedelta` or `delta_one` - 1dte delta
-        * `onegamma` or `gamma_one` - 1dte gamma (long/short)
-        * `onevanna` or `vanna_one` - 1dte vanna
-        * `onecharm` or `charm_one` - 1dte charm
+      description: |
+        Type: * `delta` or `delta_zero` - 0dte delta * `gamma` or `gamma_zero` - 0dte gamma (long/short) * `vanna` or `vanna_zero` - 0dte vanna * `charm` or `charm_zero` - 0dte charm * `onedelta` or `delta_one` - 1dte delta * `onegamma` or `gamma_one` - 1dte gamma (long/short) * `onevanna` or `vanna_one` - 1dte vanna * `onecharm` or `charm_one` - 1dte charm
     basic_response:
       type: object
       properties:
         timestamp:
-          $ref: '#/components/schemas/timestamp'
+          $ref: "#/components/schemas/timestamp"
         ticker:
-          $ref: '#/components/schemas/ticker'
+          $ref: "#/components/schemas/ticker"
         min_dte:
-          $ref: '#/components/schemas/min_dte'
+          $ref: "#/components/schemas/min_dte"
         sec_min_dte:
-          $ref: '#/components/schemas/sec_min_dte'
+          $ref: "#/components/schemas/sec_min_dte"
         spot:
-          $ref: '#/components/schemas/spot'
+          $ref: "#/components/schemas/spot"
         zero_gamma:
-          $ref: '#/components/schemas/zero_gamma'
+          $ref: "#/components/schemas/zero_gamma"
         major_pos_vol:
-          $ref: '#/components/schemas/major_pos_vol'
+          $ref: "#/components/schemas/major_pos_vol"
         major_pos_oi:
-          $ref: '#/components/schemas/major_pos_oi'
+          $ref: "#/components/schemas/major_pos_oi"
         major_neg_vol:
-          $ref: '#/components/schemas/major_neg_vol'
+          $ref: "#/components/schemas/major_neg_vol"
         major_neg_oi:
-          $ref: '#/components/schemas/major_neg_oi'
+          $ref: "#/components/schemas/major_neg_oi"
         strikes:
-          $ref: '#/components/schemas/strikes'
+          $ref: "#/components/schemas/strikes"
         sum_gex_vol:
-          $ref: '#/components/schemas/sum_gex_vol'
+          $ref: "#/components/schemas/sum_gex_vol"
         sum_gex_oi:
-          $ref: '#/components/schemas/sum_gex_oi'
+          $ref: "#/components/schemas/sum_gex_oi"
         delta_risk_reversal:
-          $ref: '#/components/schemas/delta_risk_reversal'
+          $ref: "#/components/schemas/delta_risk_reversal"
         max_priors:
-          $ref: '#/components/schemas/max_priors'
-
+          $ref: "#/components/schemas/max_priors"
     option_profile_response:
       type: object
       description: Response for the state package greek categories (delta, gamma, vanna, charm). The values are net taker imbalances from the orderflow classification engine.
       properties:
         timestamp:
-          $ref: '#/components/schemas/timestamp'
+          $ref: "#/components/schemas/timestamp"
         ticker:
-          $ref: '#/components/schemas/ticker'
+          $ref: "#/components/schemas/ticker"
         spot:
-          $ref: '#/components/schemas/spot'
+          $ref: "#/components/schemas/spot"
         min_dte:
-          $ref: '#/components/schemas/_int'
+          $ref: "#/components/schemas/_int"
         sec_min_dte:
-          $ref: '#/components/schemas/_int'
+          $ref: "#/components/schemas/_int"
         major_positive:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         major_negative:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         major_long_gamma:
-          $ref: '#/components/schemas/major_long_gamma'
+          $ref: "#/components/schemas/major_long_gamma"
         major_short_gamma:
-          $ref: '#/components/schemas/major_short_gamma'
+          $ref: "#/components/schemas/major_short_gamma"
         mini_contracts:
-          $ref: '#/components/schemas/mini_contracts'
-
+          $ref: "#/components/schemas/mini_contracts"
     orderflow_response:
       properties:
         timestamp:
-          $ref: '#/components/schemas/timestamp'
+          $ref: "#/components/schemas/timestamp"
         ticker:
-          $ref: '#/components/schemas/ticker'
+          $ref: "#/components/schemas/ticker"
         spot:
-          $ref: '#/components/schemas/spot'
+          $ref: "#/components/schemas/spot"
         z_mlgamma:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         z_msgamma:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         o_mlgamma:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         o_msgamma:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zero_mcall:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zero_mput:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_mcall:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_mput:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zcvr:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         ocvr:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zgr:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         ogr:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zvanna:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         ovanna:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         zcharm:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         ocharm:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         agg_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_agg_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         agg_call_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_agg_call_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         agg_put_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_agg_put_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         net_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_net_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         net_call_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_net_call_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         net_put_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_net_put_dex:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         dexoflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         gexoflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         cvroflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_dexoflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_gexoflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
         one_cvroflow:
-          $ref: '#/components/schemas/_double'
+          $ref: "#/components/schemas/_double"
       type: object
-
     category_classic:
       type: string
       enum:
@@ -1485,12 +1481,11 @@ components:
         * `full` or `gex_full` - Full aggregation of GEX (call/put), up to 90 days out
         * `zero` or `gex_zero` - Only next expiry+0 of GEX (call/put), 0dte
         * `one` or `gex_one` - Only next expiry+1 of GEX (call/put)
-
     research_ticker:
       type: string
       minLength: 1
       maxLength: 6
-      pattern: "^[a-zA-Z]{1,6}$"
+      pattern: ^[a-zA-Z]{1,6}$
       description: Ticker symbol for research data. One to six letters. The value is not case-sensitive.
     research_metric:
       type: string
@@ -1674,7 +1669,6 @@ components:
       description: |
         Orderflow data category:
         * `orderflow` - All orderflow metrics
-
     websocket_hub:
       type: string
       enum:
@@ -1873,7 +1867,6 @@ components:
           state_greeks_one: wss://ws.gex.bot:443/client/hubs/state_greeks_one?access_token=example
           orderflow: wss://ws.gex.bot:443/client/hubs/orderflow?access_token=example
         prefix: blue
-
     timestamp:
       $ref: "#/components/schemas/_int64"
     error_response:
@@ -2025,7 +2018,8 @@ components:
       required: true
       schema:
         type: string
-        enum: [ application/json ]
+        enum:
+          - application/json
       description: Set to "application/json".
   securitySchemes:
     bearer_auth:
@@ -2063,7 +2057,7 @@ components:
           schema:
             $ref: "#/components/schemas/error_response"
           example:
-            error: "No active websocket connection for: <hubs>. Negotiate with POST and connect to the returned hub urls before updating groups."
+            error: 'No active websocket connection for: <hubs>. Negotiate with POST and connect to the returned hub urls before updating groups.'
     "429":
       description: Rate limit exceeded.
       content:
@@ -2081,7 +2075,7 @@ components:
           example:
             error: Failed to get chart data.
 security:
-  - bearer_auth: [ ]
+  - bearer_auth: []
 tags:
   - name: Public
     description: Endpoints that need no API key, such as the ticker lists and the category list.

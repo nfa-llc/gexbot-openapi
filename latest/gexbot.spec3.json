@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions"
   },
   "servers": [
