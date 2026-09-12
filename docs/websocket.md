@@ -74,7 +74,7 @@ There is no second spot connection.
 Discover valid expiration dates with:
 
 ```http
-GET https://api.gex.bot/v2/options/{ticker}/expiries
+GET /options/{ticker}/expiries
 ```
 
 Remove the dashes from a returned `YYYY-MM-DD` date.
@@ -105,7 +105,7 @@ They publish at a lower cadence than standard groups.
 Additional Quant tickers are available from:
 
 ```http
-GET https://api.gex.bot/v2/tickers/quant
+GET /tickers/quant
 ```
 
 This route requires no API key.
@@ -123,7 +123,7 @@ Do not use the current-generation flow for a new custom Quant integration.
 ### request
 
 ```http
-POST https://api.gex.bot/v2/negotiate
+POST /negotiate
 Authorization: Bearer <YOUR_API_KEY>
 User-Agent: my-app/1.0
 Accept: application/json
@@ -227,7 +227,7 @@ Repeat the spot membership on each V2 hub that has analytics for that ticker.
 ### request
 
 ```http
-PATCH https://api.gex.bot/v2/negotiate
+PATCH /negotiate
 Authorization: Bearer <YOUR_API_KEY>
 User-Agent: my-app/1.0
 Accept: application/json

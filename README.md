@@ -77,7 +77,7 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 **gexbot — Request**
 
 ```http request
-GET https://api.gex.bot/v2/SPX/classic/gex_full
+GET /SPX/classic/gex_full
 Authorization: Bearer gexbot_custom_<your-api-key-secret>
 User-Agent: my-app/1.0
 Accept: application/json
@@ -189,7 +189,7 @@ The example shows four strike rows. A live response returns every strike.
 **Request**
 
 ```http request
-GET https://api.gex.bot/v2/research/SPX/gex_both
+GET /research/SPX/gex_both
 Authorization: Bearer <your-gbR-api-key>
 User-Agent: my-app/1.0
 Accept: application/json
