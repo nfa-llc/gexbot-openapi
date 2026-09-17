@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.1
+  version: 2.5.2
   termsOfService: https://www.gexbot.com/terms-and-conditions
 servers:
   - url: https://api.gex.bot/v2
@@ -979,6 +979,64 @@ paths:
           $ref: "#/components/responses/403"
         "429":
           $ref: "#/components/responses/429"
+  /whoami:
+    get:
+      summary: Return the account and the API key of the caller
+      description: |
+        Returns the identity, the subscription levels, the add-ons, the entitlements, the permissions and
+        the account flags of the caller. The response also gives the API key that authenticated the
+        request. Each product API key works. The route does not check the REST permission, because a
+        caller who lacks it is the caller who needs this answer. The route has no quota. The server sets
+        Cache-Control no-store.
+      operationId: ApiWhoAmIV2
+      tags:
+        - Classic
+        - State
+        - Orderflow
+        - Quant
+        - Research
+      security:
+        - bearer_auth: []
+      parameters:
+        - $ref: "#/components/parameters/user_agent_header"
+      responses:
+        "200":
+          description: The account and the API key of the caller.
+          headers:
+            Cache-Control:
+              description: Always no-store.
+              schema:
+                type: string
+                example: no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/who_am_i_response"
+        "400":
+          description: Bad Request. The User-Agent header is absent, or the Authorization header is absent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+              examples:
+                user_agent_missing:
+                  value:
+                    error: User-Agent not found.
+                authorization_missing:
+                  value:
+                    error: Authorization header not found.
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          description: Forbidden. The parent account suspended the commercial child seat.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+              example:
+                error: Commercial child access is suspended.
+        "429":
+          $ref: "#/components/responses/429"
 components:
   schemas:
     _double:
@@ -1934,6 +1992,126 @@ components:
         items:
           type: number
           format: double
+    who_am_i_response:
+      type: object
+      description: The self-identification projection of the caller. The server omits each null field.
+      required:
+        - _id
+        - role
+        - level
+        - max_level
+        - addons
+        - entitlements
+        - permissions
+        - account
+      properties:
+        _id:
+          type: string
+          description: The user identifier.
+        role:
+          type: string
+          description: The role of the account.
+        level:
+          type: array
+          items:
+            type: string
+          description: Each subscription level that the account holds.
+        max_level:
+          type: string
+          description: The highest subscription level that the account holds. Package access checks this value.
+        addons:
+          type: array
+          items:
+            type: string
+          description: Each subscription add-on of the account.
+        entitlements:
+          type: object
+          description: The paid access of the account for each product family.
+          properties:
+            gexbot:
+              type: object
+              properties:
+                level:
+                  type: string
+                addons:
+                  type: array
+                  items:
+                    type: string
+            skewbot:
+              type: object
+              properties:
+                active:
+                  type: boolean
+                tier:
+                  type: string
+        permissions:
+          type: array
+          items:
+            type: string
+          description: One entry for each permission flag that the account holds.
+        account:
+          type: object
+          description: Account-shape flags. Each flag explains an authorization result that the levels alone do not.
+          required:
+            - commercial
+            - commercial_delegate
+            - display_use
+            - child
+            - managed
+            - delegated
+          properties:
+            commercial:
+              type: boolean
+            commercial_delegate:
+              type: boolean
+            display_use:
+              type: boolean
+            child:
+              type: boolean
+            managed:
+              type: boolean
+            delegated:
+              type: boolean
+        api_key:
+          type: object
+          description: The API key that authenticated the request, never another key of the caller. The server omits the field for another authentication scheme.
+          required:
+            - id
+            - product
+            - created_at
+          properties:
+            id:
+              type: string
+              description: A masked identifier in the form {product}_{integration}_...XXXX.
+              example: gexbot_sierra_...AbCd
+            label:
+              type: string
+              nullable: true
+              description: The label that the owner gave the key.
+            product:
+              type: string
+              description: The product of the key. The product decides which API surfaces accept the key.
+            integration:
+              type: string
+              description: The integration of a scoped key. The server omits the field for an unscoped key.
+            parent_user_id:
+              type: string
+              description: The parent account of a child seat. The server omits the field for a parent account.
+            created_at:
+              type: string
+              format: date-time
+            expires_at:
+              type: string
+              format: date-time
+            rotated_at:
+              type: string
+              format: date-time
+              description: The rotation time. A rotated key authenticates until it expires, and the owner cannot manage it.
+        created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The UTC time that the account was created.
   parameters:
     research_ticker_in_path:
       name: ticker
