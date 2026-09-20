@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.5.4",
+    "version": "2.5.5",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1092,8 +1092,10 @@
             "name": "format",
             "in": "query",
             "required": false,
+            "description": "Output format. An absent value or an unknown value takes `webp`.",
             "schema": {
               "type": "string",
+              "default": "webp",
               "enum": [
                 "png",
                 "jpeg",
@@ -1124,6 +1126,7 @@
             "name": "type",
             "in": "query",
             "required": false,
+            "description": "Series render style. The default depends on the metric. It is `bar` for `oi`, `open_interest`, `volume` and an exposure metric, `scatter` for `parity` and `put_call_parity`, and `line` for every other metric.",
             "schema": {
               "type": "string",
               "enum": [
@@ -1152,17 +1155,18 @@
             "name": "strikes",
             "in": "query",
             "required": false,
+            "description": "Number of strike intervals around the spot price. The default depends on the metric. It is 50 for `oi`, `open_interest` and `volume`, 30 for an exposure metric, and 15 for every other metric. The schema declares no default, because there is no single default. A value outside the range is clamped. A value that is not an integer takes the default.",
             "schema": {
               "type": "integer",
               "minimum": 5,
-              "maximum": 250,
-              "default": 15
+              "maximum": 250
             }
           },
           {
             "name": "start_dte",
             "in": "query",
             "required": false,
+            "description": "Start of the DTE window, inclusive. The default is 0 for every metric. A value outside the range is clamped. A value that is not an integer resets `start_dte` and `end_dte` to their defaults.",
             "schema": {
               "type": "integer",
               "minimum": 0,
@@ -1174,11 +1178,11 @@
             "name": "end_dte",
             "in": "query",
             "required": false,
+            "description": "End of the DTE window, inclusive. The default depends on the metric and the view. It is 64 for `max_pain`, 365 when `view` is `term`, and 98 for every other request. The metric wins, so `max_pain` keeps 64 in the term view. The schema declares no default, because there is no single default. A value outside the range is clamped.",
             "schema": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 1000,
-              "default": 98
+              "maximum": 1000
             }
           },
           {
@@ -1256,6 +1260,7 @@
             "name": "moneyness_filter",
             "in": "query",
             "required": false,
+            "description": "Filter by moneyness or delta band. The default is `ntm` for bid_iv, mid_iv and ask_iv (and their iv_* aliases). Every other metric has no default.",
             "schema": {
               "type": "string",
               "enum": [
@@ -2190,6 +2195,7 @@
         }
       },
       "orderflow_response": {
+        "description": "The latest orderflow snapshot. An expiry prefix and a field class name each field.\n\nExpiry prefix:\n* `z_`, `zero_` or no prefix - the nearest expiry (0 DTE)\n* `o_` or `one_` - the next expiry (1 DTE)\n\nField class:\n* `agg_*` - the cumulative sum of the transactions since the 09:30 ET session open. It resets each day.\n* `net_*`, `*cvr`, `*gr`, `*vanna` and `*charm` - the net taker exposure across the active chain at this moment.\n* `*oflow` - the change in the taker exposure over the last second.\n",
         "properties": {
           "timestamp": {
             "$ref": "#/components/schemas/timestamp"
@@ -2457,7 +2463,7 @@
           "zomma_ex_vol",
           "zomma_ex_vol_skew_adj"
         ],
-        "description": "Research metric identifier for chart data generation."
+        "description": "The metric to calculate. An exposure metric is a `dex_*`, `gex_*`, `tex_*`, `vex_*`, `rho_ex_*`, `vanna_ex_*`, `charm_ex_*`, `speed_ex_*`, `color_ex_*`, `ultima_ex_*`, `vomma_ex_*` or `zomma_ex_*` metric. The `strikes` and `type` parameters take a different default for an exposure metric."
       },
       "research_asset_descriptor": {
         "type": "object",
