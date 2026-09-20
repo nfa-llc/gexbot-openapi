@@ -9,8 +9,15 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.3
+  version: 2.5.4
   termsOfService: https://www.gexbot.com/terms-and-conditions
+  contact:
+    name: gexbot support
+    url: https://docs.gexbot.com/
+    email: support@gexbot.com
+externalDocs:
+  description: The complete gexbot documentation. Agents can read https://docs.gexbot.com/llms.txt as markdown.
+  url: https://docs.gexbot.com/
 servers:
   - url: https://api.gex.bot/v2
     description: Primary v2 API server

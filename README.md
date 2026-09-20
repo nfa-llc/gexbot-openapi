@@ -56,7 +56,7 @@ every page. For example, the rate limit page is at
 - [YAML](latest/gexbot.spec3.yaml)
 - [JSON](latest/gexbot.spec3.json)
 
-The specification version is `2.5.3`.
+The specification version is `2.5.4`.
 
 Both files are generated. The source is `specs/public.yaml` in the private
 repository `nfa-llc/nfa-api-openapi-spec`. A nightly build commits the result
