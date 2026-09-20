@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.2
+  version: 2.5.3
   termsOfService: https://www.gexbot.com/terms-and-conditions
 servers:
   - url: https://api.gex.bot/v2
@@ -986,8 +986,8 @@ paths:
         Returns the identity, the subscription levels, the add-ons, the entitlements, the permissions and
         the account flags of the caller. The response also gives the API key that authenticated the
         request. Each product API key works. The route does not check the REST permission, because a
-        caller who lacks it is the caller who needs this answer. The route has no quota. The server sets
-        Cache-Control no-store.
+        caller who lacks it is the caller who needs this answer. A per-IP limit applies, and the route
+        answers 429 when one address asks too often. The server sets Cache-Control no-store.
       operationId: ApiWhoAmIV2
       tags:
         - Classic

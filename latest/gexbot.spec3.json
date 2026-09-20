@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.5.2",
+    "version": "2.5.3",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions"
   },
   "servers": [
@@ -1568,7 +1568,7 @@
     "/whoami": {
       "get": {
         "summary": "Return the account and the API key of the caller",
-        "description": "Returns the identity, the subscription levels, the add-ons, the entitlements, the permissions and\nthe account flags of the caller. The response also gives the API key that authenticated the\nrequest. Each product API key works. The route does not check the REST permission, because a\ncaller who lacks it is the caller who needs this answer. The route has no quota. The server sets\nCache-Control no-store.\n",
+        "description": "Returns the identity, the subscription levels, the add-ons, the entitlements, the permissions and\nthe account flags of the caller. The response also gives the API key that authenticated the\nrequest. Each product API key works. The route does not check the REST permission, because a\ncaller who lacks it is the caller who needs this answer. A per-IP limit applies, and the route\nanswers 429 when one address asks too often. The server sets Cache-Control no-store.\n",
         "operationId": "ApiWhoAmIV2",
         "tags": [
           "Classic",

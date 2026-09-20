@@ -3,7 +3,7 @@
 ## project overview
 - OpenAPI specification for the NFA gexbot API.
 - The API provides GEX (Gamma Exposure), greeks, orderflow, majors and max change data for enumerated tickers and categories. It also provides research charts, option expiries, futures conversion terms, history downloads, end-of-day reports and WebSocket negotiation.
-- Spec version: 2.5.2. Server: `https://api.gex.bot/v2`. Every route in this file is relative to the server URL.
+- Spec version: 2.5.3. Server: `https://api.gex.bot/v2`. Every route in this file is relative to the server URL.
 - The API generation is the `v2` in the server URL. `info.version` is the version of this document, which OpenAPI defines as distinct from the API version. The author of a change raises it in the source repository, in the same pull request that changes the contract. A raised patch marks a new document, not a compatible change to the API.
 
 ## key files & structure
