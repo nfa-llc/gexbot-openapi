@@ -19,6 +19,38 @@ which covers two product offerings:
 - **gexbot research** (`gbR`) — Chart and analytical data for a broad range of options metrics across any supported
   ticker, with a choice of output format, view and filter.
 
+## documentation
+
+This repository states the contract. [docs.gexbot.com](https://docs.gexbot.com/) states everything else. Read the
+documentation site for a fact that this repository does not give.
+
+| Page                                                                     | Subject                                                |
+|--------------------------------------------------------------------------|--------------------------------------------------------|
+| [api overview](https://docs.gexbot.com/apidocs)                          | Access tiers, permitted use, data cadence and quotas   |
+| [authentication](https://docs.gexbot.com/apidocs/general/authentication) | Key formats, required headers and `/whoami`            |
+| [rate limits](https://docs.gexbot.com/apidocs/general/rate-limits)       | Quota pools, the reset schedule and the 429 response   |
+| [latency](https://docs.gexbot.com/apidocs/general/latency)               | Phase measurement, connection reuse and the poll rate  |
+| [websocket feed](https://docs.gexbot.com/apidocs/quant/websocket)        | The negotiate flow, protobuf decode and session limits |
+| [orderflow](https://docs.gexbot.com/apidocs/orderflow)                   | What each orderflow field measures                     |
+| [research](https://docs.gexbot.com/apidocs/research)                     | Metric aliases, parameter defaults and output columns  |
+| [metrics and theory](https://docs.gexbot.com/metrics)                    | What GEX, DEX, vanna and charm measure                 |
+| [integrations](https://docs.gexbot.com/integrations)                     | The official platform plugins                          |
+| [glossary](https://docs.gexbot.com/glossary)                             | Every term, acronym and alias                          |
+
+### documentation for ai agents
+
+The documentation site serves every page as plain markdown. Fetch a markdown feed. Do not parse the HTML.
+
+| Feed                                                      | Content                                                             |
+|-----------------------------------------------------------|---------------------------------------------------------------------|
+| `https://docs.gexbot.com/llms.txt`                        | An index of every page, with one link and one description for each. |
+| `https://docs.gexbot.com/llms-full.txt`                   | The markdown of every page, in one response.                        |
+| `https://docs.gexbot.com/llms.mdx/docs/<slug>/content.md` | The markdown of one page.                                           |
+
+Read `llms.txt` first. Read one `content.md` when the index names the page you need. Read `llms-full.txt` when you need
+every page. For example, the rate limit page is at
+`https://docs.gexbot.com/llms.mdx/docs/apidocs/general/rate-limits/content.md`.
+
 ## spec
 
 - [YAML](latest/gexbot.spec3.yaml)
@@ -55,6 +87,8 @@ All endpoints except `/tickers`, `/tickers/quant` and `/{package}/categories` re
 `Authorization` header with the `Bearer` scheme. Every request must also include a `User-Agent` header.
 Each product requires a dedicated API key — a **gexbot** key for the gexbot endpoints and a **gexbot research** (`gbR`)
 key for the `/research` endpoints. Keys are not interchangeable between products.
+Every product key can call `GET /whoami`. Use it to read the subscription levels, the add-ons and the permissions of a
+key.
 
 ### endpoints
 
@@ -72,6 +106,7 @@ key for the `/research` endpoints. Keys are not interchangeable between products
 | `GET`   | `/tickers`                                   | List available ticker symbols                           |
 | `GET`   | `/{package}/categories`                      | List available data category names for a package        |
 | `GET`   | `/tickers/quant`                             | List Quant WebSocket-only tickers (no API key)          |
+| `GET`   | `/whoami`                                    | Identify the account and the API key of the caller      |
 | `GET`   | `/options/{ticker}/expiries`                 | List all valid expiries for realtime groups             |
 | `GET`   | `/futures/conversion`                        | Convert a cash ticker price to a futures price          |
 | `GET`   | `/hist/{ticker}/{package}/{category}/{date}` | Download historical data                                |
@@ -276,4 +311,5 @@ See [docs/websocket.md](docs/websocket.md) for the full WebSocket real-time feed
 ## links
 
 - [gexbot.com](https://www.gexbot.com)
+- [documentation](https://docs.gexbot.com)
 - [Terms and Conditions](https://www.gexbot.com/terms-and-conditions)
