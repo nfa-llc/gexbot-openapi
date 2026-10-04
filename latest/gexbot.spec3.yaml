@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.6
+  version: 2.5.7
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
