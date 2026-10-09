@@ -52,7 +52,7 @@ These pages answer a question that this repository does not answer:
 - Categories are scoped per package: `category_classic`, `category_state`, `category_orderflow`. The `/{package}/categories` response uses `data_category`.
 - Error responses use the shared `error_response` schema (`{"error": "..."}`).
 - Chart response schemas: `basic_response`, `option_profile_response`, `orderflow_response`, `majors_response`, `maxchange_response`. Other response schemas: `quant_tickers_response`, `option_expiries_response`, `futures_conversion_response`, `research_asset_descriptor`, `websocket_negotiate_response`, `websocket_group_update_response`, `websocket_legacy_negotiate_response`, `who_am_i_response`.
-- `GET /whoami` accepts every product API key, including a **gexbot research** key. It returns the subscription levels, the add-ons, the entitlements, the permissions and the account flags of the caller, and the masked API key. Call it to read the access of a key. Do not probe a data route to find the access.
+- `GET /whoami` accepts a **gexbot** key or a **gexbot research** key. A key of another product, such as a skewbot key, gets 403. It returns the subscription levels, the add-ons, the entitlements, the permissions and the account flags of the caller, and the masked API key. Call it to read the access of a key. Do not probe a data route to find the access.
 - Tags represent subscription tiers: `Public`, `Classic`, `State`, `Orderflow`, `Quant`, `Research`.
 - **Rate limits**: Data updates at most once per second. Do not send more than one request per second per ticker per
   metric. Quotas: each endpoint pool has a daily and a monthly allowance. A breach returns 429
