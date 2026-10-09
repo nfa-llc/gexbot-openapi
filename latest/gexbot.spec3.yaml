@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.5.7
+  version: 2.5.8
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -998,9 +998,10 @@ paths:
       description: |
         Returns the identity, the subscription levels, the add-ons, the entitlements, the permissions and
         the account flags of the caller. The response also gives the API key that authenticated the
-        request. Each product API key works. The route does not check the REST permission, because a
-        caller who lacks it is the caller who needs this answer. A per-IP limit applies, and the route
-        answers 429 when one address asks too often. The server sets Cache-Control no-store.
+        request. A gexbot key or a research key works. A key of another product, gets 403. The route
+        does not check the REST permission, because a caller who lacks it is the caller who needs this answer.
+        A per-IP limit applies, and the route answers 429 when one address asks too often.
+        The server sets Cache-Control no-store.
       operationId: ApiWhoAmIV2
       tags:
         - Classic
@@ -1041,7 +1042,7 @@ paths:
         "401":
           $ref: "#/components/responses/401"
         "403":
-          description: Forbidden. The parent account suspended the commercial child seat.
+          description: Forbidden. The key is for a product that this route does not serve, or the parent account suspended the commercial child seat.
           content:
             application/json:
               schema:
