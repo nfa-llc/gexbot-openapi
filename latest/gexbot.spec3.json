@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.5.8",
+    "version": "2.7.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -742,7 +742,7 @@
     "/futures/conversion": {
       "get": {
         "summary": "Convert a cash ticker price to a synthetic futures price",
-        "description": "Returns the terms that convert a cash ticker price to a synthetic futures price. Multiply the cash price by `multiplier`, then add `additive`.\n\nThe service fits the terms over the most recent 30 minutes of 1-minute data. Synthetic futures tickers such as `ES_SPX` are not valid source tickers.\n",
+        "description": "Returns the terms that convert a cash ticker price to a synthetic futures price. Multiply the cash price by `multiplier`, then add `additive`.\n\nWithout `as_of`, the service uses recent one-minute data and selects a contract. With `as_of`, supply a past ISO 8601 instant and an explicit `contract`. The service uses completed equity-session minutes at or before that time. Outside the session, it uses the latest completed session. Synthetic futures tickers such as `ES_SPX` are not valid source tickers.\n",
         "tags": [
           "Classic",
           "State",
@@ -759,7 +759,7 @@
             "name": "ticker",
             "in": "query",
             "required": true,
-            "description": "Cash source ticker. Use one of the supported pairs: SPX/ES, SPY/ES, NDX/NQ, QQQ/NQ, RUT/RTY, IWM/RTY, DIA/YM, GLD/GC, SLV/SI, USO/CL.",
+            "description": "Cash source ticker. Any listed stock or index ticker can use any supported futures product.",
             "schema": {
               "$ref": "#/components/schemas/futures_conversion_ticker"
             }
@@ -768,7 +768,7 @@
             "name": "future",
             "in": "query",
             "required": true,
-            "description": "Futures root to convert to. It must match the pair of `ticker`.",
+            "description": "Supported futures root to convert to.",
             "schema": {
               "$ref": "#/components/schemas/synth_future_ticker"
             }
@@ -777,10 +777,31 @@
             "name": "model",
             "in": "query",
             "required": false,
-            "description": "Conversion model. An omitted model defaults to `additive` for an index source ticker and `affine` for a stock source ticker.",
+            "description": "Conversion model. SPX/ES, NDX/NQ, and RUT/RTY default to `additive`. Every other pair defaults to `affine`.",
             "schema": {
               "$ref": "#/components/schemas/futures_conversion_model"
             }
+          },
+          {
+            "name": "as_of",
+            "in": "query",
+            "required": false,
+            "description": "Past ISO 8601 instant with an explicit UTC offset, from 2023-02-14 onward. Requires contract. Outside market hours, use the latest completed regular equity session.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2025-08-05T15:30:00Z"
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": false,
+            "description": "Futures contract, such as ESU5. Required with as_of. Without as_of, choose the active contract or its immediate predecessor or successor.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ESU5"
           },
           {
             "$ref": "#/components/parameters/user_agent_header"
@@ -1847,19 +1868,14 @@
         ]
       },
       "futures_conversion_ticker": {
-        "type": "string",
-        "description": "Cash source ticker of a supported futures conversion pair.",
-        "enum": [
-          "SPX",
-          "SPY",
-          "NDX",
-          "QQQ",
-          "RUT",
-          "IWM",
-          "DIA",
-          "GLD",
-          "SLV",
-          "USO"
+        "description": "Cash source ticker for futures conversion.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ticker_stock"
+          },
+          {
+            "$ref": "#/components/schemas/ticker_index"
+          }
         ]
       },
       "futures_conversion_model": {
@@ -1881,7 +1897,7 @@
         "properties": {
           "future_contract": {
             "type": "string",
-            "description": "Futures contract that the conversion uses."
+            "description": "Futures contract that the conversion uses. Historical requests use the contract that the caller supplies."
           },
           "multiplier": {
             "type": "number",
