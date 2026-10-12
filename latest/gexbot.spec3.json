@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -836,14 +836,14 @@
             "$ref": "#/components/responses/403"
           },
           "404": {
-            "description": "Not Found. No spot data, no futures bars, no active contract, or fewer than 10 matched minutes for the conversion window.",
+            "description": "Conversion not found.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/error_response"
                 },
                 "example": {
-                  "error": "No active futures contract found for product."
+                  "error": "Not found."
                 }
               }
             }
@@ -852,14 +852,14 @@
             "$ref": "#/components/responses/429"
           },
           "503": {
-            "description": "Service Unavailable. The upstream futures data did not answer, or a refresh of the same pair is in progress. Retry after a short delay.",
+            "description": "Service unavailable.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/error_response"
                 },
                 "example": {
-                  "error": "Futures conversion is currently being refreshed. Try again shortly."
+                  "error": "Service unavailable."
                 }
               }
             }
