@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.8.0",
+    "version": "2.9.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -797,7 +797,7 @@
             "name": "contract",
             "in": "query",
             "required": false,
-            "description": "Futures contract, such as ESU5. Required with as_of. Live requests accept the active or next contract, or the previous contract through its settlement date.",
+            "description": "Futures contract, such as ESU5. Required with as_of. Live requests accept the active contract, the previous contract through settlement, or the next contract near rollover.",
             "schema": {
               "type": "string"
             },
@@ -1908,6 +1908,10 @@
             "type": "number",
             "format": "double",
             "description": "Add this value after you apply the multiplier."
+          },
+          "next_contract": {
+            "type": "string",
+            "description": "Next live contract, offered near rollover when listed by the provider."
           },
           "previous_contract": {
             "type": "string",
