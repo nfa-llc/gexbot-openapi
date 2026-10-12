@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.7.1
+  version: 2.8.0
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -489,7 +489,7 @@ paths:
         - name: contract
           in: query
           required: false
-          description: Futures contract, such as ESU5. Required with as_of. Without as_of, choose the active contract or its immediate predecessor or successor.
+          description: Futures contract, such as ESU5. Required with as_of. Live requests accept the active or next contract, or the previous contract through its settlement date.
           schema:
             type: string
           example: ESU5
@@ -1233,6 +1233,13 @@ components:
           type: number
           format: double
           description: Add this value after you apply the multiplier.
+        previous_contract:
+          type: string
+          description: Previous live contract, when available through its settlement date.
+        previous_contract_settlement_date:
+          type: string
+          format: date
+          description: Settlement date of the available previous contract.
     ticker_variant:
       type: string
       minLength: 6
