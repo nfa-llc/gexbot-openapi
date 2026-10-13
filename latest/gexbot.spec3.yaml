@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.9.0
+  version: 2.9.1
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -731,11 +731,10 @@ paths:
         - name: strikes
           in: query
           required: false
-          description: Number of strike intervals around the spot price. The default depends on the metric. It is 50 for `oi`, `open_interest` and `volume`, 30 for an exposure metric, and 15 for every other metric. The schema declares no default, because there is no single default. A value outside the range is clamped. A value that is not an integer takes the default.
+          description: Number of listed strikes on each side of the spot price. The value counts strikes, not points or percent of price. The window applies one time to the full book across all expirations. The center is the spot price of the requested ticker. For an index ticker such as `NDX`, the center is the cash index spot, not the futures price. Use `GET /futures/conversion` to convert a price. The response omits each strike outside the window. The default depends on the metric. It is 50 for `oi`, `open_interest` and `volume`, 30 for an exposure metric, and 15 for every other metric. The schema declares no default, because there is no single default. Every format uses the same default. The png, jpeg, svg, pdf and webp formats clamp the value to 5-250, because a chart with more rows is not legible. The json and csv formats draw no chart, so 250 is not their ceiling. For these formats, a value larger than the strike count of the chain returns the full book. A value below 5 is clamped to 5. A value that is not an integer takes the default.
           schema:
             type: integer
             minimum: 5
-            maximum: 250
         - name: start_dte
           in: query
           required: false
@@ -838,7 +837,21 @@ paths:
               schema:
                 type: string
         "400":
-          $ref: "#/components/responses/400"
+          description: |
+            Bad Request. The server rejects the request before it reads options data. Four cases:
+
+            * The User-Agent header or the Authorization header is absent, or the request has the legacy
+              `key` query parameter.
+            * The ticker or the metric has an invalid shape: `{"error": "Invalid ticker."}` or
+              `{"error": "Invalid metric."}`.
+            * The metric is unknown or restricted: `{"error": "invalid request"}`.
+            * The symbol is not in the symbol cache: `{"error": "Ticker NOPE is not a valid symbol."}`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+              example:
+                error: Ticker NOPE is not a valid symbol.
         "401":
           $ref: "#/components/responses/401"
         "403":
