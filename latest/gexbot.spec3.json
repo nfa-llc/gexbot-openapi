@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.9.1",
+    "version": "2.9.2",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1210,8 +1210,16 @@
             "name": "expiration_filter",
             "in": "query",
             "required": false,
+            "description": "Expiration series to keep. `m` keeps monthly expirations, `w` keeps weekly expirations and `q` keeps quarterly expirations. `*` keeps all expirations. The value is not case-sensitive. An absent value or an unknown value takes `*`. The filter has no effect on the json and csv formats.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "*",
+              "enum": [
+                "*",
+                "m",
+                "w",
+                "q"
+              ]
             }
           },
           {
