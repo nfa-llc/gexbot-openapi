@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.9.2",
+    "version": "2.10.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -742,7 +742,7 @@
     "/futures/conversion": {
       "get": {
         "summary": "Convert a cash ticker price to a synthetic futures price",
-        "description": "Returns the terms that convert a cash ticker price to a synthetic futures price. Multiply the cash price by `multiplier`, then add `additive`.\n\nWithout `as_of`, the service uses recent one-minute data and selects a contract. With `as_of`, supply a past ISO 8601 instant and an explicit `contract`. The service uses completed equity-session minutes at or before that time. Outside the session, it uses the latest completed session. Synthetic futures tickers such as `ES_SPX` are not valid source tickers.\n",
+        "description": "Returns the terms that convert a cash ticker price to a synthetic futures price. Multiply the cash price by `multiplier`, then add `additive`.\n\nWithout `as_of`, the service uses recent one-minute data and selects a contract. With `as_of`, supply a past ISO 8601 instant with a UTC offset or Unix seconds, plus an explicit `contract`. The service uses completed equity-session minutes at or before that time. Outside the session, it uses the latest completed session. Synthetic futures tickers such as `ES_SPX` are not valid source tickers.\n",
         "tags": [
           "Classic",
           "State",
@@ -786,12 +786,11 @@
             "name": "as_of",
             "in": "query",
             "required": false,
-            "description": "Past ISO 8601 instant with an explicit UTC offset, from 2023-02-14 onward. Requires contract. Outside market hours, use the latest completed regular equity session.",
+            "description": "Past ISO 8601 instant with a UTC offset or Unix timestamp in seconds, from 2023-02-14 onward. Requires contract. Outside market hours, use the latest completed regular equity session.",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             },
-            "example": "2025-08-05T15:30:00Z"
+            "example": "1754407800"
           },
           {
             "name": "contract",
