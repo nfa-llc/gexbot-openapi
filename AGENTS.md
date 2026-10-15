@@ -62,7 +62,7 @@ These pages answer a question that this repository does not answer:
 
 ## developer workflows
 - Do not edit `latest/` by hand. Both files are generated from `specs/public.yaml` in the private repository `nfa-llc/nfa-api-openapi-spec`, and the nightly build overwrites a hand edit.
-- To change the published specification, change that source. An operation marked `x-public: false` there is held back from this repository.
+- To change the published specification, change that source. An operation whose `x-nfa-publish` list does not name `gexbot` is held back from this repository.
 - Run `python scripts/spec-version.py --check` to prove the version agrees in every file. Run `--sync` to repair the JSON twin and the prose lines.
 - Integration tests live in the private `nfa-api-openapi-spec` repo (`tests/run_api_tests.http`).
 - Validate the spec using external tools (e.g., Swagger Editor, openapi-generator-cli) as needed.
