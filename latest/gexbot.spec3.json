@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.12.0",
+    "version": "2.12.1",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -979,7 +979,7 @@
     "/hist/{ticker}/{package}/{category}": {
       "post": {
         "summary": "Stream intraday history to fill a gap in your data",
-        "description": "Streams the chart samples of the ticker, the package and the category between start and end. The\nrange must be 8 hours or less. The Accept header selects the stream format. The server sets\nCache-Control no-store.\n\nThis endpoint has a small daily request limit. Use it only to fill intraday gaps that the WebSocket\nstream or the other REST endpoints did not capture. Do not use it as a primary data feed. After the\nmarket close, use the history cache endpoint, GET /hist/{ticker}/{package}/{category}/{date}, for the\ndata of the full day. The history cache endpoint needs a Quant subscription.\n\nA restricted commercial key gets 403 while spot redaction is on, because the server cannot redact a\nstreamed response.\n",
+        "description": "Streams the chart samples of the ticker, the package and the category between start and end. The\nrange must be 8 hours or less. The Accept header selects the stream format. The server sets\nCache-Control no-store.\n\nThis endpoint has a small daily request limit. Use it only to fill intraday gaps that the WebSocket\nstream or the other REST endpoints did not capture. Do not use it as a primary data feed.\n\nAfter the market close, get the data of the full day from the endpoint for your subscription. Classic,\nState and Orderflow use the EOD report, GET /hist/eod/{ticker}. It holds the latest trading day only,\nand the report of the current day is available from 5:00 PM ET. Quant uses the history cache endpoint,\nGET /hist/{ticker}/{package}/{category}/{date}, for any day in about the last 90 days.\n\nA restricted commercial key gets 403 while spot redaction is on, because the server cannot redact a\nstreamed response.\n",
         "tags": [
           "Classic",
           "State",
@@ -1103,7 +1103,7 @@
             "$ref": "#/components/responses/unsupported_media_type"
           },
           "429": {
-            "description": "Rate limit exceeded. The daily or the monthly limit of this endpoint is reached. Use the history cache endpoint, GET /hist/{ticker}/{package}/{category}/{date} (Quant), for the data of a full day.",
+            "description": "Rate limit exceeded. The daily or the monthly limit of this endpoint is reached. For the data of a full day, use the EOD report, GET /hist/eod/{ticker} (Classic and up), or the history cache endpoint, GET /hist/{ticker}/{package}/{category}/{date} (Quant).",
             "content": {
               "application/json": {
                 "schema": {
