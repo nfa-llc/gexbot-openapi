@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.11.0",
+    "version": "2.12.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -972,6 +972,148 @@
           },
           "429": {
             "$ref": "#/components/responses/429"
+          }
+        }
+      }
+    },
+    "/hist/{ticker}/{package}/{category}": {
+      "post": {
+        "summary": "Stream intraday history to fill a gap in your data",
+        "description": "Streams the chart samples of the ticker, the package and the category between start and end. The\nrange must be 8 hours or less. The Accept header selects the stream format. The server sets\nCache-Control no-store.\n\nThis endpoint has a small daily request limit. Use it only to fill intraday gaps that the WebSocket\nstream or the other REST endpoints did not capture. Do not use it as a primary data feed. After the\nmarket close, use the history cache endpoint, GET /hist/{ticker}/{package}/{category}/{date}, for the\ndata of the full day. The history cache endpoint needs a Quant subscription.\n\nA restricted commercial key gets 403 while spot redaction is on, because the server cannot redact a\nstreamed response.\n",
+        "tags": [
+          "Classic",
+          "State",
+          "Orderflow",
+          "Quant"
+        ],
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ticker_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/package_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/category_in_path"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent_header"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "application/json-seq",
+                "application/x-ndjson",
+                "application/jsonlines",
+                "application/protobuf",
+                "application/json"
+              ]
+            },
+            "description": "Selects the stream format. application/json-seq gives a JSON text sequence. application/x-ndjson or application/jsonlines gives one JSON object on each line. application/protobuf gives protocol buffer chunks. Any other value gives application/stream+json."
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/date_range"
+        },
+        "responses": {
+          "200": {
+            "description": "The chart samples in time order. The server sets the status before it streams, so an error during the stream ends the body early with status 200.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json-seq": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/stream+json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The User-Agent header is absent, a path value is not valid, or the body is not valid. The range must be 8 hours or less, start must be before end, and both values must use the same unit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Date range too large."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "description": "Forbidden. The account has no API REST access (Classic and up), the subscription does not include the package, or the key is a restricted commercial key while spot redaction is on.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "examples": {
+                  "no_rest_permission": {
+                    "value": {
+                      "error": "User does not have permission to access this endpoint."
+                    }
+                  },
+                  "package_not_included": {
+                    "value": {
+                      "error": "Classic package does not have access."
+                    }
+                  },
+                  "restricted_key": {
+                    "value": {
+                      "error": "This response format is not available for restricted commercial API keys."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "$ref": "#/components/responses/unsupported_media_type"
+          },
+          "429": {
+            "description": "Rate limit exceeded. The daily or the monthly limit of this endpoint is reached. Use the history cache endpoint, GET /hist/{ticker}/{package}/{category}/{date} (Quant), for the data of a full day.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Rate limit exceeded."
+                }
+              }
+            }
           }
         }
       }
@@ -3121,6 +3263,22 @@
             "description": "The UTC time that the account was created."
           }
         }
+      },
+      "date_range_request": {
+        "type": "object",
+        "description": "A time range in Unix epoch time. The server reads start to select seconds or milliseconds, so end must use the same unit. The range must be 8 hours or less.",
+        "required": [
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "$ref": "#/components/schemas/_int64"
+          },
+          "end": {
+            "$ref": "#/components/schemas/_int64"
+          }
+        }
       }
     },
     "parameters": {
@@ -3243,6 +3401,32 @@
         "description": "Set to \"application/json\"."
       }
     },
+    "headers": {
+      "no_store": {
+        "description": "Always no-store.",
+        "schema": {
+          "type": "string",
+          "example": "no-store"
+        }
+      }
+    },
+    "requestBodies": {
+      "date_range": {
+        "required": true,
+        "description": "The time range. The Content-Type header must be application/json, or the server returns 415.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/date_range_request"
+            },
+            "example": {
+              "start": 1789133400000,
+              "end": 1789148400000
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "bearer_auth": {
         "type": "http",
@@ -3325,6 +3509,19 @@
             },
             "example": {
               "error": "Failed to get chart data."
+            }
+          }
+        }
+      },
+      "unsupported_media_type": {
+        "description": "Unsupported Media Type. The Content-Type header is not application/json.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            },
+            "example": {
+              "error": "Content-Type header must be application/json."
             }
           }
         }
