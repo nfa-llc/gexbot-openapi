@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.12.1",
+    "version": "2.13.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1255,7 +1255,7 @@
             "name": "format",
             "in": "query",
             "required": false,
-            "description": "Output format. An absent value or an unknown value takes `webp`.",
+            "description": "Output format. An absent value or an unknown value takes `webp`. `parity` and `put_call_parity` are images only: `json` and `csv` return 400.",
             "schema": {
               "type": "string",
               "default": "webp",
@@ -2595,8 +2595,6 @@
           "gex_oi_skew_adj",
           "gex_vol",
           "gex_vol_skew_adj",
-          "intrinsic",
-          "intrinsic_value",
           "extrinsic",
           "max_pain",
           "charm_mid",
