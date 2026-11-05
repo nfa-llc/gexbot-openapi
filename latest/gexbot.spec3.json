@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.13.0",
+    "version": "2.14.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -3122,21 +3122,24 @@
           },
           "level": {
             "type": "array",
+            "deprecated": true,
             "items": {
               "type": "string"
             },
-            "description": "Each subscription level that the account holds."
+            "description": "Deprecated copy. Read `entitlements.gexbot.level`. Each subscription level that the account holds. `entitlements.gexbot.level` is the highest level in this list, or `free` for an empty list."
           },
           "max_level": {
             "type": "string",
-            "description": "The highest subscription level that the account holds. Package access checks this value."
+            "deprecated": true,
+            "description": "Deprecated copy. Read `entitlements.gexbot.level`, which holds the same value. The highest subscription level that the account holds."
           },
           "addons": {
             "type": "array",
+            "deprecated": true,
             "items": {
               "type": "string"
             },
-            "description": "Each subscription add-on of the account."
+            "description": "Deprecated copy. Read `entitlements.gexbot.addons`, which holds the same add-ons. Each subscription add-on of the account."
           },
           "entitlements": {
             "type": "object",
@@ -3146,7 +3149,8 @@
                 "type": "object",
                 "properties": {
                   "level": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The highest subscription level that the account holds. Package access checks this value."
                   },
                   "addons": {
                     "type": "array",
