@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.14.0",
+    "version": "2.14.1",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1503,7 +1503,7 @@
             }
           },
           "400": {
-            "description": "Bad Request. The server rejects the request before it reads options data. Four cases:\n\n* The User-Agent header or the Authorization header is absent, or the request has the legacy\n  `key` query parameter.\n* The ticker or the metric has an invalid shape: `{\"error\": \"Invalid ticker.\"}` or\n  `{\"error\": \"Invalid metric.\"}`.\n* The metric is unknown or restricted: `{\"error\": \"invalid request\"}`.\n* The symbol is not in the symbol cache: `{\"error\": \"Ticker NOPE is not a valid symbol.\"}`.\n",
+            "description": "Bad Request. The server rejects the request. Five cases:\n\n* The User-Agent header or the Authorization header is absent, or the request has the legacy\n  `key` query parameter.\n* The ticker or the metric has an invalid shape: `{\"error\": \"Invalid ticker.\"}` or\n  `{\"error\": \"Invalid metric.\"}`.\n* The metric is unknown or restricted: `{\"error\": \"invalid request\"}`.\n* The symbol is not in the symbol cache: `{\"error\": \"Ticker NOPE is not a valid symbol.\"}`.\n* No data is left after the filters. A metric with no value in the strike window, such as a\n  surface when the Greeks are not available, gives the same result:\n  `{\"error\": \"No data found after applying filters. Try widening your strike range or checking your moneyness/contract filters.\"}`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1533,6 +1533,19 @@
                 },
                 "example": {
                   "error": "Failed to reach upstream research service."
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable. The research service could not get the Greeks for the chain, so it returns no chart. Send the request again later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                "example": {
+                  "error": "Server error."
                 }
               }
             }

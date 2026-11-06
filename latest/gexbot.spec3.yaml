@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.14.0
+  version: 2.14.1
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -978,7 +978,7 @@ paths:
                 type: string
         "400":
           description: |
-            Bad Request. The server rejects the request before it reads options data. Four cases:
+            Bad Request. The server rejects the request. Five cases:
 
             * The User-Agent header or the Authorization header is absent, or the request has the legacy
               `key` query parameter.
@@ -986,6 +986,9 @@ paths:
               `{"error": "Invalid metric."}`.
             * The metric is unknown or restricted: `{"error": "invalid request"}`.
             * The symbol is not in the symbol cache: `{"error": "Ticker NOPE is not a valid symbol."}`.
+            * No data is left after the filters. A metric with no value in the strike window, such as a
+              surface when the Greeks are not available, gives the same result:
+              `{"error": "No data found after applying filters. Try widening your strike range or checking your moneyness/contract filters."}`.
           content:
             application/json:
               schema:
@@ -1006,6 +1009,14 @@ paths:
                 $ref: "#/components/schemas/error_response"
               example:
                 error: Failed to reach upstream research service.
+        "503":
+          description: Service Unavailable. The research service could not get the Greeks for the chain, so it returns no chart. Send the request again later.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+              example:
+                error: Server error.
   /negotiate:
     post:
       summary: Negotiate WebSocket connection URLs and initial groups
