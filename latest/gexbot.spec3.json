@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.16.0",
+    "version": "2.17.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1274,7 +1274,7 @@
             "name": "view",
             "in": "query",
             "required": false,
-            "description": "The value is case-sensitive. An absent or unknown value takes `skew`. An unsupported view\nfalls back to `skew` for that metric.\n\n`mirror` applies only to `bid_iv`, `mid_iv`, `ask_iv` and their `iv_*` aliases.\n`heatmap` applies to exposure metrics (`*_oi`, `*_vol`, `*_both` and their\n`*_skew_adj` forms), `oi`, `open_interest`, `volume` and implied volatility metrics.\nEach exposure, open interest or volume cell holds the net value (call plus put).\nEach implied volatility cell holds one contract (see `moneyness_filter`).\nThe `json` and `csv` formats fall back to `skew`, because a heatmap is an image.\n\n`hv` has three views, and another value takes `heatmap`. `heatmap` is the HV of each window\nfrom 5 to 398 trading days on each of the last `rows` sessions, as `json` or `csv`.\n`what_if` is the HV of 9 windows after each move of the next close: one frame for each of the\nlast `frames` sessions, then one for the next session, as `json` only. `history` is the daily\nrecord of HV and IV: one row for each of the last `rows` sessions, as `json` only.\n",
+            "description": "The value is case-sensitive. An absent or unknown value takes `skew`. An unsupported view\nfalls back to `skew` for that metric.\n\n`mirror` applies only to `bid_iv`, `mid_iv`, `ask_iv` and their `iv_*` aliases.\n`heatmap` applies to exposure metrics (`*_oi`, `*_vol`, `*_both` and their\n`*_skew_adj` forms), `oi`, `open_interest`, `volume` and implied volatility metrics.\nEach exposure, open interest or volume cell holds the net value (call plus put).\nEach implied volatility cell holds one contract (see `moneyness_filter`).\nThe `json` and `csv` formats fall back to `skew`, because a heatmap is an image.\n\n`hv` has three views, and another value takes `heatmap`. `heatmap` is the HV of each window\nfrom 5 to 398 trading days on each of the last `rows` sessions, as `json` or `csv`.\n`what_if` is the HV of 9 windows after each move of the next close: one frame for each of the\nlast `frames` sessions, then one for the next session, as `json` only. The moves come in two\nladders: the sigma ladder reaches at least -6 to +6 sigma of one day, and the percent ladder at\nleast -10% to +10%. `history` is the daily record of HV and IV: one row for each of the last\n`rows` sessions, as `json` only.\n",
             "schema": {
               "type": "string",
               "enum": [
@@ -1532,7 +1532,7 @@
                     },
                     {
                       "type": "object",
-                      "description": "The HV series of `hv`. Each HV and each move is in percent. `hv_heatmap`: `dates` (oldest first), `windows` (5 to 398), `hv[date][window]` (null where the history is too short), `lowest` (the 5 lowest rows of each window) and `scale` (min, median, max). `hv_what_if`: `windows`, `sigma`, `workbook_moves` and `frames`, one for each replayed session and one for the next session (`date` is `next`). `hv_history`: `record` (`first`, `last`, `count`) and `rows`, oldest first. Each row has `d` (the session date), `src` (`eod` or `backfill`), `c` (the close), `hv5` to `hv252`, `iv7` to `iv365` and `iv_dte` (the DTE of the expiration of each IV tenor). A value that the worker cannot calculate is null. The `hv_heatmap` and `hv_what_if` objects also have `closes`.",
+                      "description": "The HV series of `hv`. Each HV and each move is in percent. `hv_heatmap`: `dates` (oldest first), `windows` (5 to 398), `hv[date][window]` (null where the history is too short), `lowest` (the 5 lowest rows of each window) and `scale` (min, median, max). `hv_what_if`: `windows`, `sigma`, `workbook_moves` and `frames`, one for each replayed session and one for the next session (`date` is `next`). `sigma.k` holds the steps of the sigma ladder, low to high, in multiples of one day's sigma (`sigma.window` is the HV window that sets it); step `k` is the move `expm1(k * sigma)`. `workbook_moves` holds the percent ladder, high to low. The sigma ladder reaches at least -6 to +6 and the percent ladder at least +10 to -10; today they reach -12 to +12 (169 steps) and +20 to -20 (137 moves). Each frame holds the HV of each window at each step of each ladder. `hv_history`: `record` (`first`, `last`, `count`) and `rows`, oldest first. Each row has `d` (the session date), `src` (`eod` or `backfill`), `c` (the close), `hv5` to `hv252`, `iv7` to `iv365` and `iv_dte` (the DTE of the expiration of each IV tenor). A value that the worker cannot calculate is null. The `hv_heatmap` and `hv_what_if` objects also have `closes`.",
                       "required": [
                         "kind",
                         "ticker",
