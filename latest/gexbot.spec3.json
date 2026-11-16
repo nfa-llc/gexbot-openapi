@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.18.0",
+    "version": "2.19.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -3242,6 +3242,15 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The Stripe status of the gexbot subscription in lower case (for example `active`, `trialing`, `past_due` or `canceled`), or `none` when the account never had one. Absent when no billing update wrote it yet. It does not give access; `level` does."
+                  },
+                  "trial_end": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The end of the gexbot trial in Unix seconds. Only a `trialing` status has it."
                   }
                 }
               },
@@ -3253,6 +3262,15 @@
                   },
                   "tier": {
                     "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The Stripe status of the skewbot subscription, with the same values as the gexbot status."
+                  },
+                  "trial_end": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The end of the skewbot trial in Unix seconds. Only a `trialing` status has it."
                   }
                 }
               }
