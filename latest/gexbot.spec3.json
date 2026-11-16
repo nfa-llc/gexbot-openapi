@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.17.0",
+    "version": "2.18.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -2247,7 +2247,6 @@
           "PLTR",
           "QQQ",
           "RDDT",
-          "ROKU",
           "SHOP",
           "SLV",
           "SMCI",
