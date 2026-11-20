@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.20.0
+  version: 2.21.0
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -1495,6 +1495,7 @@ components:
         - AAPL
         - AMD
         - AMZN
+        - ANT
         - APP
         - AVGO
         - BABA
