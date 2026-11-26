@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.24.0
+  version: 2.25.0
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -856,7 +856,7 @@ paths:
           required: false
           description: |
             The sessions of the `hv` `heatmap` and `history` views. Other metrics ignore it. The `heatmap` view takes
-            500 by default and at most 750. The `history` view (the daily record, from 2020-12-28) takes 2000 by
+            500 by default and at most 2000 (about 6 MB of JSON). The `history` view (the daily record, from 2020-12-28) takes 2000 by
             default and at most 2000. A larger value takes the limit of its view.
           schema:
             type: integer
