@@ -3,7 +3,7 @@
   "info": {
     "title": "NFA gexbot API",
     "description": "NFA gexbot API",
-    "version": "2.23.0",
+    "version": "2.24.0",
     "termsOfService": "https://www.gexbot.com/terms-and-conditions",
     "contact": {
       "name": "gexbot support",
@@ -1311,12 +1311,11 @@
             "name": "rows",
             "in": "query",
             "required": false,
-            "description": "The sessions of the `hv` `heatmap` and `history` views. Other metrics ignore it. A larger value takes 750.",
+            "description": "The sessions of the `hv` `heatmap` and `history` views. Other metrics ignore it. The `heatmap` view takes\n500 by default and at most 750. The `history` view (the daily record, from 2020-12-28) takes 2000 by\ndefault and at most 2000. A larger value takes the limit of its view.\n",
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 750,
-              "default": 500
+              "maximum": 2000
             }
           },
           {
