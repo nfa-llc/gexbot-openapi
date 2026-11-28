@@ -9,7 +9,7 @@ openapi: 3.0.1
 info:
   title: NFA gexbot API
   description: NFA gexbot API
-  version: 2.26.0
+  version: 2.27.0
   termsOfService: https://www.gexbot.com/terms-and-conditions
   contact:
     name: gexbot support
@@ -865,11 +865,11 @@ paths:
         - name: frames
           in: query
           required: false
-          description: The replayed sessions of the `hv` what-if, before the frame of the next session. Other metrics ignore it. A larger value takes 120.
+          description: The replayed sessions of the `hv` what-if, before the frame of the next session. Other metrics ignore it. The default is 60 and the limit is 252 (one year of sessions). A larger value takes 252.
           schema:
             type: integer
             minimum: 1
-            maximum: 120
+            maximum: 252
             default: 60
         - name: decimals
           in: query
